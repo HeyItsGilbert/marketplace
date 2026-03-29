@@ -1,0 +1,5 @@
+{
+  "name": "presentation-review",
+  "description": "Adds a /death-by-ppt skill for reviewing MARP presentations",
+  "version": "1.0.0"
+}

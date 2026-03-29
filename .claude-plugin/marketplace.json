@@ -1,0 +1,13 @@
+{
+  "name": "my-plugins",
+  "owner": {
+    "name": "Gilbert Sanchez"
+  },
+  "plugins": [
+    {
+      "name": "presentation-review",
+      "source": "./plugins/presentation-review",
+      "description": "Adds a /death-by-ppt skill for reviewing MARP presentations"
+    }
+  ]
+}
