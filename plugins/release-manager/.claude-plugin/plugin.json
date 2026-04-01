@@ -1,0 +1,5 @@
+{
+  "name": "release-manager",
+  "description": "Adds a /release skill for updating CHANGELOG.md and module manifest versions following Keep a Changelog and SemVer",
+  "version": "1.0.0"
+}
