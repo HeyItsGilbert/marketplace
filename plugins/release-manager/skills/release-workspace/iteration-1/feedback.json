@@ -1,0 +1,35 @@
+{
+  "reviews": [
+    {
+      "run_id": "node-mid-lifecycle-with_skill",
+      "feedback": "Perfect",
+      "timestamp": "2026-04-01T21:23:15.055Z"
+    },
+    {
+      "run_id": "node-mid-lifecycle-without_skill",
+      "feedback": "This also looks fine.",
+      "timestamp": "2026-04-01T21:23:15.055Z"
+    },
+    {
+      "run_id": "powershell-first-release-with_skill",
+      "feedback": "Both files look correct. Leaving a `## [Unreleased]` is fine. Not having links is also fine.",
+      "timestamp": "2026-04-01T21:23:15.055Z"
+    },
+    {
+      "run_id": "powershell-first-release-without_skill",
+      "feedback": "Files look correct. Links at the end can be optional (but are recommended).",
+      "timestamp": "2026-04-01T21:23:15.055Z"
+    },
+    {
+      "run_id": "ambiguous-commits-node-with_skill",
+      "feedback": "Files look good",
+      "timestamp": "2026-04-01T21:23:15.055Z"
+    },
+    {
+      "run_id": "ambiguous-commits-node-without_skill",
+      "feedback": "This worked well (assuming that the version is valid for node). Good that Changelog used 2.2.0 while package was 2.2.0.0.",
+      "timestamp": "2026-04-01T21:23:15.055Z"
+    }
+  ],
+  "status": "complete"
+}

@@ -1,0 +1,12 @@
+{
+  "expectations": [
+    {"text": "Version normalized from 4-part (2.1.0.0) to 3-part semver", "passed": false, "evidence": "package.json: \"version\": \"2.2.0.0\" — kept 4-part format."},
+    {"text": "MINOR bump applied (new exported functions: batchProcess, withRetry)", "passed": true, "evidence": "Bumped 2.1 → 2.2 (correct direction), but wrong format."},
+    {"text": "Did not ask the user for clarification (determined bump from code diffs)", "passed": true, "evidence": "Agent determined bump from code analysis without asking."},
+    {"text": "CHANGELOG entries reflect actual code changes, not just commit messages", "passed": true, "evidence": "Entries describe batch processing, retry with exponential backoff."},
+    {"text": "package.json version uses strict 3-part semver (e.g., 2.2.0, not 2.2.0.0)", "passed": false, "evidence": "\"version\": \"2.2.0.0\" — still 4-part."},
+    {"text": "Commit message follows chore(release): X.Y.Z format", "passed": false, "evidence": "No commit — sandbox blocked git write ops."}
+  ],
+  "summary": {"passed": 3, "failed": 3, "total": 6, "pass_rate": 0.50},
+  "timing": {"total_duration_seconds": 537.2}
+}

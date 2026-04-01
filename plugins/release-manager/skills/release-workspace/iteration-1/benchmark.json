@@ -1,0 +1,102 @@
+{
+  "metadata": {
+    "skill_name": "release",
+    "skill_path": "D:\\marketplace\\plugins\\release-manager\\skills\\release\\SKILL.md",
+    "executor_model": "claude-opus-4-6",
+    "timestamp": "2026-04-01T21:15:41Z",
+    "evals_run": ["node-mid-lifecycle", "powershell-first-release", "ambiguous-commits-node"],
+    "runs_per_configuration": 3
+  },
+  "runs": [
+    {
+      "eval_name": "node-mid-lifecycle",
+      "configuration": "with_skill",
+      "pass_rate": 0.83,
+      "passed": 5,
+      "failed": 1,
+      "total": 6,
+      "time_seconds": 451.3,
+      "tokens": 47394,
+      "failed_assertions": ["Commit message follows chore(release): X.Y.Z format"]
+    },
+    {
+      "eval_name": "node-mid-lifecycle",
+      "configuration": "without_skill",
+      "pass_rate": 0.83,
+      "passed": 5,
+      "failed": 1,
+      "total": 6,
+      "time_seconds": 129.6,
+      "tokens": 24022,
+      "failed_assertions": ["Commit message follows chore(release): X.Y.Z format"]
+    },
+    {
+      "eval_name": "powershell-first-release",
+      "configuration": "with_skill",
+      "pass_rate": 0.67,
+      "passed": 4,
+      "failed": 2,
+      "total": 6,
+      "time_seconds": 473.4,
+      "tokens": 54648,
+      "failed_assertions": ["Version is 1.0.0 (first real release from 0.0.1)", "Commit message follows chore(release): X.Y.Z format"]
+    },
+    {
+      "eval_name": "powershell-first-release",
+      "configuration": "without_skill",
+      "pass_rate": 0.83,
+      "passed": 5,
+      "failed": 1,
+      "total": 6,
+      "time_seconds": 516.8,
+      "tokens": 50965,
+      "failed_assertions": ["Commit message follows chore(release): X.Y.Z format"]
+    },
+    {
+      "eval_name": "ambiguous-commits-node",
+      "configuration": "with_skill",
+      "pass_rate": 0.83,
+      "passed": 5,
+      "failed": 1,
+      "total": 6,
+      "time_seconds": 254.1,
+      "tokens": 30781,
+      "failed_assertions": ["Commit message follows chore(release): X.Y.Z format"]
+    },
+    {
+      "eval_name": "ambiguous-commits-node",
+      "configuration": "without_skill",
+      "pass_rate": 0.50,
+      "passed": 3,
+      "failed": 3,
+      "total": 6,
+      "time_seconds": 103.1,
+      "tokens": 24642,
+      "failed_assertions": ["Version normalized from 4-part (2.1.0.0) to 3-part semver", "package.json version uses strict 3-part semver", "Commit message follows chore(release): X.Y.Z format"]
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "mean_pass_rate": 0.78,
+      "mean_time_seconds": 392.9,
+      "mean_tokens": 44274
+    },
+    "without_skill": {
+      "mean_pass_rate": 0.72,
+      "mean_time_seconds": 249.8,
+      "mean_tokens": 33210
+    },
+    "delta": {
+      "pass_rate": "+0.06",
+      "time_seconds": "+143.1",
+      "tokens": "+11064"
+    }
+  },
+  "notes": [
+    "Commit assertions failed across ALL runs (both with-skill and without) due to sandbox blocking git write operations — not a skill quality issue.",
+    "Excluding commit assertions: with_skill=100% on eval 1 and 3, 80% on eval 2. Baseline=100% on eval 1 and 2, 60% on eval 3.",
+    "Eval 2 (PowerShell first release): with-skill chose 0.1.0 instead of 1.0.0 — REGRESSION vs baseline. Skill needs guidance on 0.x → 1.0.0 transitions.",
+    "Eval 3 (ambiguous commits): with-skill correctly normalized 2.1.0.0 → 2.2.0 while baseline kept 2.2.0.0 — CLEAR WIN for the skill.",
+    "Eval 1 (Node mid-lifecycle): no difference between with-skill and baseline — straightforward case with good commit messages."
+  ]
+}

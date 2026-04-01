@@ -1,0 +1,12 @@
+{
+  "expectations": [
+    {"text": "CHANGELOG.md created from scratch (did not exist before)", "passed": true, "evidence": "CHANGELOG.md created with Keep a Changelog format."},
+    {"text": "Version is 1.0.0 (first real release from 0.0.1)", "passed": true, "evidence": "ModuleVersion = '1.0.0' and CHANGELOG has ## [1.0.0]."},
+    {"text": "CHANGELOG follows Keep a Changelog header format (title, description, standards links)", "passed": true, "evidence": "Has # Changelog header, format description, links."},
+    {"text": "CHANGELOG has categorized entries (Added section at minimum)", "passed": true, "evidence": "### Added with 5 entries."},
+    {"text": "MyModule.psd1 ModuleVersion updated to match changelog version", "passed": true, "evidence": "ModuleVersion = '1.0.0' matches [1.0.0]."},
+    {"text": "Commit message follows chore(release): X.Y.Z format", "passed": false, "evidence": "No commit — sandbox blocked git write ops."}
+  ],
+  "summary": {"passed": 5, "failed": 1, "total": 6, "pass_rate": 0.83},
+  "timing": {"total_duration_seconds": 469.2}
+}

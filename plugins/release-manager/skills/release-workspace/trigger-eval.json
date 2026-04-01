@@ -1,0 +1,78 @@
+[
+  {
+    "query": "ok so we've merged the last few PRs for the 2.4 milestone and QA signed off yesterday. Can you bump the version and update the changelog so I can cut the release this afternoon?",
+    "should_trigger": true
+  },
+  {
+    "query": "I need to ship v3.0.0 of this PowerShell module — there are breaking changes in the exported functions. Can you prepare the release with the changelog and manifest update?",
+    "should_trigger": true
+  },
+  {
+    "query": "the commit messages since the last tag are a mess but the code is solid. Can you figure out what changed and prep a new version?",
+    "should_trigger": true
+  },
+  {
+    "query": "This is our first real release of the module. We've been on 0.0.1 since we started. Time to go 1.0 — update everything we need for a proper release.",
+    "should_trigger": true
+  },
+  {
+    "query": "I just merged a hotfix for the auth bypass. Can you bump the patch version, update CHANGELOG.md, and open a PR so we can get this out today?",
+    "should_trigger": true
+  },
+  {
+    "query": "we need to cut a release for the npm package. version is currently 4.1.2 in package.json. There have been 3 commits since then — two features and a bugfix. Do the changelog and version bump.",
+    "should_trigger": true
+  },
+  {
+    "query": "Hey can you update the changelog and pyproject.toml version? We're releasing 1.8.0 of the data pipeline today and I want the changelog to follow Keep a Changelog format.",
+    "should_trigger": true
+  },
+  {
+    "query": "prepare a release for this rust crate. Check Cargo.toml for the current version and git log for what changed since last time.",
+    "should_trigger": true
+  },
+  {
+    "query": "the package.json has version 1.2.3.4 which isn't standard semver. I want to normalize it and ship a proper release with a changelog entry.",
+    "should_trigger": true
+  },
+  {
+    "query": "Can you help me write a GitHub Actions workflow that automatically creates a release when I push a tag? I want it to generate release notes from the commits.",
+    "should_trigger": false
+  },
+  {
+    "query": "I'm setting up semantic-release for this repo. Can you configure .releaserc.json with the right plugins for npm publishing and changelog generation?",
+    "should_trigger": false
+  },
+  {
+    "query": "Can you look at CHANGELOG.md and tell me what was in the 2.3.0 release? I need to know if the retry logic was included.",
+    "should_trigger": false
+  },
+  {
+    "query": "I need to roll back to version 1.4.2. Can you check out that tag and help me figure out what broke in 1.5.0?",
+    "should_trigger": false
+  },
+  {
+    "query": "Can you add a pre-commit hook that validates conventional commit message format? We keep getting commits like 'fixed stuff' and 'updated thing'.",
+    "should_trigger": false
+  },
+  {
+    "query": "I want to refactor the version field in our package.json to follow a CalVer scheme like 2026.04.01 instead of semver. Can you update the build scripts?",
+    "should_trigger": false
+  },
+  {
+    "query": "Help me write a script that parses CHANGELOG.md and extracts the latest version's release notes to post in our Slack channel.",
+    "should_trigger": false
+  },
+  {
+    "query": "Can you set up dependabot.yml to automatically bump our dependency versions weekly? I want it for both npm and GitHub Actions.",
+    "should_trigger": false
+  },
+  {
+    "query": "We use lerna for our monorepo. Can you help me configure independent versioning so each package gets its own changelog and version bumps?",
+    "should_trigger": false
+  },
+  {
+    "query": "I need to create a git tag for the current version and push it to origin. The version in package.json is 3.2.1.",
+    "should_trigger": false
+  }
+]

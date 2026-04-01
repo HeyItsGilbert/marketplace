@@ -1,0 +1,6 @@
+{
+  "name": "data-processor",
+  "version": "2.2.0",
+  "description": "Data processing pipeline",
+  "main": "src/index.js"
+}

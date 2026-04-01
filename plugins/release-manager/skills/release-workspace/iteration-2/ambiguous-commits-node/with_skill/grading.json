@@ -1,0 +1,12 @@
+{
+  "expectations": [
+    {"text": "Version normalized from 4-part (2.1.0.0) to 3-part semver", "passed": true, "evidence": "package.json: \"version\": \"2.2.0\""},
+    {"text": "MINOR bump applied (new exported functions: batchProcess, withRetry)", "passed": true, "evidence": "2.1.0 → 2.2.0. Agent cited batchProcess export and withRetry as justification."},
+    {"text": "Did not ask the user for clarification (determined bump from code diffs)", "passed": true, "evidence": "Agent read diffs via git diff 0f7cc86..HEAD. No user prompt requested."},
+    {"text": "CHANGELOG entries reflect actual code changes, not just commit messages", "passed": true, "evidence": "Entries describe batch processing, retry with exponential backoff, TypeError fix."},
+    {"text": "package.json version uses strict 3-part semver (e.g., 2.2.0, not 2.2.0.0)", "passed": true, "evidence": "\"version\": \"2.2.0\""},
+    {"text": "Commit message follows chore(release): X.Y.Z format", "passed": false, "evidence": "No commit — sandbox blocked git write ops."}
+  ],
+  "summary": {"passed": 5, "failed": 1, "total": 6, "pass_rate": 0.83},
+  "timing": {"total_duration_seconds": 602.6}
+}

@@ -1,0 +1,31 @@
+{
+  "eval_id": 3,
+  "eval_name": "ambiguous-commits-node",
+  "prompt": "Ship a new version of this package. The commit messages aren't great but the code is ready.",
+  "assertions": [
+    {
+      "text": "Version normalized from 4-part (2.1.0.0) to 3-part semver",
+      "type": "version_normalization"
+    },
+    {
+      "text": "MINOR bump applied (new exported functions: batchProcess, withRetry)",
+      "type": "correct_bump"
+    },
+    {
+      "text": "Did not ask the user for clarification (determined bump from code diffs)",
+      "type": "no_user_prompt"
+    },
+    {
+      "text": "CHANGELOG entries reflect actual code changes, not just commit messages",
+      "type": "changelog_quality"
+    },
+    {
+      "text": "package.json version uses strict 3-part semver (e.g., 2.2.0, not 2.2.0.0)",
+      "type": "semver_strict"
+    },
+    {
+      "text": "Commit message follows chore(release): X.Y.Z format",
+      "type": "commit_format"
+    }
+  ]
+}

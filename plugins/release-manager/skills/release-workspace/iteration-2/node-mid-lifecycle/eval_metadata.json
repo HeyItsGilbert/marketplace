@@ -1,0 +1,31 @@
+{
+  "eval_id": 1,
+  "eval_name": "node-mid-lifecycle",
+  "prompt": "Prepare a release for this project. There have been several changes since v1.2.0.",
+  "assertions": [
+    {
+      "text": "Version bumped to 1.3.0 (MINOR bump for new features)",
+      "type": "exact_version"
+    },
+    {
+      "text": "CHANGELOG contains a ## [1.3.0] section with today's date (2026-04-01)",
+      "type": "changelog_format"
+    },
+    {
+      "text": "CHANGELOG has both Added and Fixed categories with correct entries",
+      "type": "changelog_categories"
+    },
+    {
+      "text": "package.json version field matches the changelog version (1.3.0)",
+      "type": "version_sync"
+    },
+    {
+      "text": "Comparison link added at bottom of CHANGELOG",
+      "type": "changelog_links"
+    },
+    {
+      "text": "Commit message follows chore(release): X.Y.Z format",
+      "type": "commit_format"
+    }
+  ]
+}

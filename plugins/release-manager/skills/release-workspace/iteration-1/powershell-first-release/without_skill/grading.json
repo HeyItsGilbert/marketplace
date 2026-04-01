@@ -1,0 +1,47 @@
+{
+  "expectations": [
+    {
+      "text": "CHANGELOG.md created from scratch (did not exist before)",
+      "passed": true,
+      "evidence": "CHANGELOG.md was created with Keep a Changelog format."
+    },
+    {
+      "text": "Version is 1.0.0 (first real release from 0.0.1)",
+      "passed": true,
+      "evidence": "Version set to 1.0.0. Agent correctly interpreted 'first real release' as 1.0.0."
+    },
+    {
+      "text": "CHANGELOG follows Keep a Changelog header format (title, description, standards links)",
+      "passed": true,
+      "evidence": "Has '# Changelog' header, format description, links to keepachangelog.com/en/1.1.0/ and semver.org/spec/v2.0.0.html."
+    },
+    {
+      "text": "CHANGELOG has categorized entries (Added section at minimum)",
+      "passed": true,
+      "evidence": "'### Added' section lists all 4 items (3 functions + Pester tests)."
+    },
+    {
+      "text": "MyModule.psd1 ModuleVersion updated to match changelog version",
+      "passed": true,
+      "evidence": "ModuleVersion = '1.0.0' matches CHANGELOG [1.0.0]."
+    },
+    {
+      "text": "Commit message follows chore(release): X.Y.Z format",
+      "passed": false,
+      "evidence": "No commit was created — git write operations were blocked by sandbox."
+    }
+  ],
+  "summary": {
+    "passed": 5,
+    "failed": 1,
+    "total": 6,
+    "pass_rate": 0.83
+  },
+  "timing": {
+    "total_duration_seconds": 516.8
+  },
+  "eval_feedback": {
+    "suggestions": [],
+    "overall": "Baseline outperformed with-skill on version choice (1.0.0 vs 0.1.0)."
+  }
+}

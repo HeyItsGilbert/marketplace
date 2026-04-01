@@ -1,0 +1,47 @@
+{
+  "expectations": [
+    {
+      "text": "Version normalized from 4-part (2.1.0.0) to 3-part semver",
+      "passed": false,
+      "evidence": "package.json has \"version\": \"2.2.0.0\" — kept 4-part format instead of normalizing to semver."
+    },
+    {
+      "text": "MINOR bump applied (new exported functions: batchProcess, withRetry)",
+      "passed": true,
+      "evidence": "Bumped from 2.1.0.0 to 2.2.0.0 — correct bump direction (MINOR), but wrong format."
+    },
+    {
+      "text": "Did not ask the user for clarification (determined bump from code diffs)",
+      "passed": true,
+      "evidence": "Agent determined the bump without asking. CHANGELOG entries describe actual features."
+    },
+    {
+      "text": "CHANGELOG entries reflect actual code changes, not just commit messages",
+      "passed": true,
+      "evidence": "CHANGELOG describes 'Batch processing support with configurable batch sizes', 'Retry utility with exponential backoff', 'Exported batchProcess from main entry point'."
+    },
+    {
+      "text": "package.json version uses strict 3-part semver (e.g., 2.2.0, not 2.2.0.0)",
+      "passed": false,
+      "evidence": "package.json has \"version\": \"2.2.0.0\" — still 4-part."
+    },
+    {
+      "text": "Commit message follows chore(release): X.Y.Z format",
+      "passed": false,
+      "evidence": "No commit was created — git write operations were blocked by sandbox."
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 3,
+    "total": 6,
+    "pass_rate": 0.50
+  },
+  "timing": {
+    "total_duration_seconds": 103.1
+  },
+  "eval_feedback": {
+    "suggestions": [],
+    "overall": "Baseline failed on semver normalization — kept 4-part version. This is the key differentiator for the skill."
+  }
+}

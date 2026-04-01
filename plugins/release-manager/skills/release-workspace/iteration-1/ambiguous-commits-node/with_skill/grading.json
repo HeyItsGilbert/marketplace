@@ -1,0 +1,47 @@
+{
+  "expectations": [
+    {
+      "text": "Version normalized from 4-part (2.1.0.0) to 3-part semver",
+      "passed": true,
+      "evidence": "package.json updated from \"2.1.0.0\" to \"2.2.0\" — correct 3-part semver."
+    },
+    {
+      "text": "MINOR bump applied (new exported functions: batchProcess, withRetry)",
+      "passed": true,
+      "evidence": "Version bumped from 2.1.0 (normalized) to 2.2.0. Agent explicitly cited batchProcess export and withRetry as new features justifying MINOR bump."
+    },
+    {
+      "text": "Did not ask the user for clarification (determined bump from code diffs)",
+      "passed": true,
+      "evidence": "Agent read diffs via 'git diff 0f7cc86..HEAD' and determined MINOR from new public APIs. No user prompt was requested."
+    },
+    {
+      "text": "CHANGELOG entries reflect actual code changes, not just commit messages",
+      "passed": true,
+      "evidence": "CHANGELOG says 'Batch processing function with configurable batch size', 'Retry utility with exponential backoff', 'Use TypeError instead of generic Error' — describes actual code, not vague commit messages."
+    },
+    {
+      "text": "package.json version uses strict 3-part semver (e.g., 2.2.0, not 2.2.0.0)",
+      "passed": true,
+      "evidence": "package.json has \"version\": \"2.2.0\""
+    },
+    {
+      "text": "Commit message follows chore(release): X.Y.Z format",
+      "passed": false,
+      "evidence": "No commit was created — git write operations were blocked by sandbox. Agent reported intended message was 'chore(release): 2.2.0'."
+    }
+  ],
+  "summary": {
+    "passed": 5,
+    "failed": 1,
+    "total": 6,
+    "pass_rate": 0.83
+  },
+  "timing": {
+    "total_duration_seconds": 254.1
+  },
+  "eval_feedback": {
+    "suggestions": [],
+    "overall": "Strong performance. Skill correctly guided version normalization and diff-based bump determination."
+  }
+}

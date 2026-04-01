@@ -1,0 +1,10 @@
+# Cloned test repos (regenerated from test-repos/ sources)
+iteration-*/*/with_skill/repo/
+iteration-*/*/without_skill/repo/
+
+# Generated HTML viewers (regenerated from benchmark.json)
+iteration-*/review.html
+eval_review.html
+
+# Skill-creator log directories
+description_optimization_logs/

@@ -1,0 +1,12 @@
+{
+  "expectations": [
+    {"text": "Version bumped to 1.3.0 (MINOR bump for new features)", "passed": true, "evidence": "package.json: \"version\": \"1.3.0\""},
+    {"text": "CHANGELOG contains a ## [1.3.0] section with today's date (2026-04-01)", "passed": true, "evidence": "## [1.3.0] - 2026-04-01"},
+    {"text": "CHANGELOG has both Added and Fixed categories with correct entries", "passed": true, "evidence": "Added: JWT auth, error utility. Fixed: server timeout, error message."},
+    {"text": "package.json version field matches the changelog version (1.3.0)", "passed": true, "evidence": "Both show 1.3.0"},
+    {"text": "Comparison link added at bottom of CHANGELOG", "passed": true, "evidence": "[1.3.0]: https://github.com/test/my-app/compare/v1.2.0...v1.3.0"},
+    {"text": "Commit message follows chore(release): X.Y.Z format", "passed": false, "evidence": "No commit — sandbox blocked git write ops."}
+  ],
+  "summary": {"passed": 5, "failed": 1, "total": 6, "pass_rate": 0.83},
+  "timing": {"total_duration_seconds": 655.1}
+}

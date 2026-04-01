@@ -1,0 +1,50 @@
+{
+  "skill_name": "release",
+  "evals": [
+    {
+      "id": 1,
+      "name": "node-mid-lifecycle",
+      "prompt": "Prepare a release for this project. There have been several changes since v1.2.0.",
+      "expected_output": "CHANGELOG.md updated with a new v1.3.0 section (2 feat, 2 fix). package.json bumped to 1.3.0. Commit created.",
+      "files": [],
+      "assertions": [
+        "Version bumped to 1.3.0 (MINOR bump for new features)",
+        "CHANGELOG contains a ## [1.3.0] section with today's date",
+        "CHANGELOG has both Added and Fixed categories with correct entries",
+        "package.json version field matches the changelog version",
+        "Comparison link added at bottom of CHANGELOG",
+        "Commit message follows chore(release): X.Y.Z format"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "powershell-first-release",
+      "prompt": "This module is ready for its first real release. Can you prepare the release?",
+      "expected_output": "CHANGELOG.md created from scratch with v1.0.0 section. MyModule.psd1 bumped to 1.0.0. Commit created.",
+      "files": [],
+      "assertions": [
+        "CHANGELOG.md created from scratch",
+        "Version is 1.0.0 (first real release from 0.0.1)",
+        "CHANGELOG follows Keep a Changelog header format",
+        "CHANGELOG has categorized entries (Added section at minimum)",
+        "MyModule.psd1 ModuleVersion updated to match changelog version",
+        "Commit message follows chore(release): X.Y.Z format"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "ambiguous-commits-node",
+      "prompt": "Ship a new version of this package. The commit messages aren't great but the code is ready.",
+      "expected_output": "Reads diffs to determine MINOR bump. Normalizes version from 2.1.0.0 to 2.2.0. CHANGELOG updated. package.json updated. Commit created.",
+      "files": [],
+      "assertions": [
+        "Version normalized from 4-part (2.1.0.0) to 3-part semver",
+        "MINOR bump applied (new exported functions: batchProcess, withRetry)",
+        "Did not ask the user for clarification",
+        "CHANGELOG entries reflect actual code changes, not just commit messages",
+        "package.json version uses strict 3-part semver",
+        "Commit message follows chore(release): X.Y.Z format"
+      ]
+    }
+  ]
+}
