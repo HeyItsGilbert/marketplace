@@ -1,0 +1,92 @@
+[
+  {
+    "query": "ok so we just spent the last hour going back and forth and I think we should go with Tailwind over styled-components. The DX is better, the bundle is smaller since we're already using PostCSS, and honestly half the team already knows it from side projects. Can you update the Button component to use Tailwind classes instead of the styled wrapper?",
+    "should_trigger": true,
+    "notes": "Decision just made in conversation — classic ADR moment. The user isn't asking for an ADR but the skill should nudge."
+  },
+  {
+    "query": "hey so I noticed in code review that Jake's PR uses axios but we've been using fetch everywhere else in the app. Is there a doc somewhere that says which one we're supposed to use? I don't think we ever wrote it down but we definitely standardized on fetch like 6 months ago when we dropped the IE11 requirement",
+    "should_trigger": true,
+    "notes": "Backfill opportunity — undocumented standard discovered during code review. Matches the Spotify 'tree falls in the forest' pattern."
+  },
+  {
+    "query": "I just finished migrating our last service from Winston to Pino for logging. We made this call back in January because Winston's maintainer went inactive and Pino's structured JSON output works better with our Datadog pipeline. Can you check if there are any Winston imports left anywhere?",
+    "should_trigger": true,
+    "notes": "Completed migration with clear reasoning that was never documented. Good backfill candidate."
+  },
+  {
+    "query": "we decided to use PostgreSQL for the new billing service instead of DynamoDB. The team agreed that the relational model fits better for financial data where we need ACID transactions, and we already have Postgres expertise from the user service. Can you set up the schema?",
+    "should_trigger": true,
+    "notes": "Explicit 'we decided' with reasoning and trade-offs. Should trigger even though the user is asking for schema work, not an ADR."
+  },
+  {
+    "query": "going forward all new API endpoints should return camelCase JSON keys instead of snake_case. I know our Python services use snake_case internally but the frontend team has been complaining about the inconsistency for months and we just agreed in standup to standardize on camelCase at the API boundary",
+    "should_trigger": true,
+    "notes": "New standard being established — small decision with cross-team impact. Classic 'small changes' ADR from the Spotify model."
+  },
+  {
+    "query": "let's switch from Jest to Vitest for this project. It's way faster with the Vite dev server we're already running and the API is almost identical so migration should be trivial",
+    "should_trigger": true,
+    "notes": "Decision being made with rationale. Not a huge change but meaningful enough to document."
+  },
+  {
+    "query": "RFC-003 about the new auth middleware just got approved by the team. Sarah and I reviewed the final comments and we're going with the JWT + refresh token approach. Can you help me close out that RFC?",
+    "should_trigger": true,
+    "notes": "RFC concluded — needs to be converted to an ADR. The /adr skill should handle the conversion workflow."
+  },
+  {
+    "query": "I'm looking at the codebase and every service seems to handle retries differently — some use exponential backoff, some use fixed delays, some don't retry at all. We should probably pick one approach. I think Polly with exponential backoff and jitter makes the most sense given our microservices architecture. What do you think?",
+    "should_trigger": true,
+    "notes": "User is crystallizing a decision from observed inconsistency. Borderline RFC vs ADR — since they already have a preferred approach and are asking for confirmation, ADR is appropriate."
+  },
+  {
+    "query": "document this decision: we're keeping our monorepo structure instead of splitting into separate repos. The build times are manageable with Nx caching and the cross-package refactoring story is way better in a monorepo",
+    "should_trigger": true,
+    "notes": "Explicit request to document a decision. Direct trigger."
+  },
+  {
+    "query": "can you write a README for this project? It should cover installation, configuration, and basic usage. Also add a section about the environment variables we need",
+    "should_trigger": false,
+    "notes": "General documentation request — README, not an ADR. Shares the word 'document' but the intent is clearly different."
+  },
+  {
+    "query": "I'm thinking about whether we should use GraphQL or REST for the new product catalog API. There are good arguments for both — GraphQL would help with the mobile app's overfetching problem but REST is simpler and the team knows it better. I'm not sure yet, I want to get input from the backend team before we commit to anything",
+    "should_trigger": false,
+    "notes": "Decision NOT yet made — user explicitly wants group input first. This should trigger /rfc, not /adr."
+  },
+  {
+    "query": "we need to plan the migration from our legacy auth system to OAuth2. This is going to affect every service and I want to write up a proposal so the whole team can weigh in before we start. There are a few different approaches and I'm not sure which one will work best with our existing session management",
+    "should_trigger": false,
+    "notes": "Large change needing team discussion — RFC territory, not ADR."
+  },
+  {
+    "query": "can you look at ADR-005 and tell me if it's still relevant? The codebase has changed a lot since it was written and I'm not sure the constraints it mentions still apply",
+    "should_trigger": false,
+    "notes": "Reading/reviewing an existing ADR, not creating a new one. The skill shouldn't trigger for read-only operations."
+  },
+  {
+    "query": "our production database went down for 3 hours last night because the connection pool was exhausted. Can you help me write up a post-mortem? I need to document the timeline, root cause, and what we're going to do to prevent this from happening again",
+    "should_trigger": false,
+    "notes": "Post-mortem / incident report — different document type. Shares 'document' and 'decision' concepts but the format and purpose are different."
+  },
+  {
+    "query": "can you add JSDoc comments to all the exported functions in src/utils/? The new hires keep asking what these functions do and it'd be nice to have inline docs",
+    "should_trigger": false,
+    "notes": "Code documentation, not architectural decision documentation."
+  },
+  {
+    "query": "I want to propose switching our CI from Jenkins to GitHub Actions. I've drafted some notes but this affects the whole org and I need buy-in from DevOps and the security team before we move forward. Can you help me structure this as a formal proposal?",
+    "should_trigger": false,
+    "notes": "Formal proposal needing org-wide buy-in — RFC, not ADR. The word 'propose' and need for cross-team input are strong RFC signals."
+  },
+  {
+    "query": "what's the best way to handle feature flags in a React app? I've seen some teams use LaunchDarkly, others just use environment variables. We haven't decided anything yet, just exploring options",
+    "should_trigger": false,
+    "notes": "Exploratory question, no decision being made. 'Just exploring options' is not a decision moment."
+  },
+  {
+    "query": "can you set up the API endpoint for creating new users? It should accept a POST request with name, email, and password fields, validate the input, hash the password with bcrypt, and store it in the users table",
+    "should_trigger": false,
+    "notes": "Pure implementation task. No architectural decision being made — the decisions (REST, bcrypt, users table) were already made elsewhere."
+  }
+]

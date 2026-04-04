@@ -1,0 +1,92 @@
+[
+  {
+    "query": "I want to propose switching our CI from Jenkins to GitHub Actions. This affects the whole org — DevOps manages the Jenkins cluster, security has custom scan steps baked into the Jenkinsfiles, and 40+ repos have pipeline configs that would need migrating. I need to get buy-in from at least 3 teams before we start. Can you help me write this up?",
+    "should_trigger": true,
+    "notes": "Classic RFC scenario — large change, multiple stakeholders, explicit need for buy-in before committing."
+  },
+  {
+    "query": "I'm thinking about whether we should use GraphQL or REST for the new product catalog API. GraphQL would solve the mobile app's overfetching problem and let the frontend team iterate without backend changes, but REST is simpler and the team knows it well. I want to get input from the backend and mobile teams before we commit",
+    "should_trigger": true,
+    "notes": "Competing approaches, user explicitly wants team input. Decision not yet made."
+  },
+  {
+    "query": "we need to figure out our approach to multi-tenancy before we onboard enterprise customers. I see three options: schema-per-tenant in Postgres, row-level security with a tenant_id column, or separate databases entirely. Each has different cost/complexity/isolation tradeoffs and I honestly don't know which is right. I want the data team and the infra team to weigh in",
+    "should_trigger": true,
+    "notes": "High-stakes architectural decision with multiple valid approaches and explicit request for cross-team input."
+  },
+  {
+    "query": "we're going to need to break our v1 API eventually — we've been bolting on query parameters and the contract is getting messy. I want to draft a versioning strategy proposal that covers how we'll handle the v1→v2 transition, backward compatibility window, client migration timeline, and deprecation notices. This needs sign-off from the platform team and our top 3 API consumers",
+    "should_trigger": true,
+    "notes": "Breaking API change with consumer impact. User wants structured proposal and sign-off."
+  },
+  {
+    "query": "I've been thinking about moving our frontend state management from Redux to Zustand. The boilerplate reduction would be huge and Zustand's API is much simpler, but we have 200+ connected components and the migration would take months. I'm not sure if it's worth it and I want to hear what the rest of the frontend guild thinks before we go down this path",
+    "should_trigger": true,
+    "notes": "Large migration with uncertainty. User wants discussion before committing."
+  },
+  {
+    "query": "our monolith is getting hard to deploy — a CSS change triggers a full rebuild and the deploy takes 45 minutes. I want to propose a micro-frontend architecture where each team owns a deployable slice. But I know this adds complexity around shared dependencies and routing, so I want to write it up properly and get feedback from the architect and the DevEx team",
+    "should_trigger": true,
+    "notes": "Major architectural shift with known trade-offs. User wants to 'write it up properly' for feedback."
+  },
+  {
+    "query": "we need to decide how to handle PII in our analytics pipeline. GDPR means we can't just log everything anymore — we need either field-level encryption, tokenization, or a separate PII-free data warehouse. Legal has opinions, the data science team has requirements, and infra needs to support whatever we pick. I want to get everyone aligned before we build anything",
+    "should_trigger": true,
+    "notes": "Compliance-driven decision with multiple stakeholders. Needs structured discussion."
+  },
+  {
+    "query": "I want input from the team on how we should handle real-time updates. Right now we're polling every 5 seconds which is killing our API. WebSockets, SSE, and long-polling are all on the table but they each have different infrastructure implications. I don't want to just pick one — this needs a proper discussion",
+    "should_trigger": true,
+    "notes": "Explicit 'I want input from the team' and 'proper discussion' signals."
+  },
+  {
+    "query": "let's go with Tailwind. The DX is better, bundle is smaller, and half the team already knows it. Can you refactor the Button component to use utility classes?",
+    "should_trigger": false,
+    "notes": "Decision already made — this is ADR territory, not RFC. No discussion needed."
+  },
+  {
+    "query": "we decided to use PostgreSQL for the billing service. ACID transactions are non-negotiable for financial data and we already have Postgres expertise. Can you set up the schema?",
+    "should_trigger": false,
+    "notes": "Decision already reached with clear rationale. ADR, not RFC."
+  },
+  {
+    "query": "going forward all new endpoints return camelCase JSON. We agreed in standup today. Can you update the serializer config?",
+    "should_trigger": false,
+    "notes": "Small decision, consensus already exists. ADR at most."
+  },
+  {
+    "query": "can you write a README for the new service? Cover installation, env vars, and how to run locally",
+    "should_trigger": false,
+    "notes": "General documentation, not a proposal."
+  },
+  {
+    "query": "our production database went down for 3 hours last night. Can you help me write a post-mortem with timeline, root cause, and remediation steps?",
+    "should_trigger": false,
+    "notes": "Incident report / post-mortem. Different document type entirely."
+  },
+  {
+    "query": "can you review this PR? I refactored the auth middleware to use the new token validation library. The tests pass but I want a second set of eyes on the error handling",
+    "should_trigger": false,
+    "notes": "Code review request. Implementation work, not a proposal."
+  },
+  {
+    "query": "what's the difference between Vite and Webpack? I'm just curious, not making any decisions right now — I saw a blog post about it and wanted to understand the trade-offs",
+    "should_trigger": false,
+    "notes": "Exploratory learning question. 'Not making any decisions right now' is an explicit non-signal."
+  },
+  {
+    "query": "can you add error handling to the payment processing function? If the Stripe API returns a 429 we should retry with exponential backoff, and if it returns a 402 we should mark the invoice as failed",
+    "should_trigger": false,
+    "notes": "Pure implementation task. The decisions (retry strategy, failure handling) are being made inline at a code level, not at an architectural level."
+  },
+  {
+    "query": "document this decision: we're keeping the monorepo. Build times are fine with Nx caching and cross-package refactoring is way easier",
+    "should_trigger": false,
+    "notes": "Explicit 'document this decision' — decision is already made. This is an ADR, not an RFC."
+  },
+  {
+    "query": "can you create a Confluence page summarizing our API endpoints? The new contractor needs a reference for the integration work",
+    "should_trigger": false,
+    "notes": "External documentation request. Not a proposal or decision record."
+  }
+]

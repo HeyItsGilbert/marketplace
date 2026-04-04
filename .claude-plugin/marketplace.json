@@ -13,6 +13,11 @@
       "name": "release-manager",
       "source": "./plugins/release-manager",
       "description": "Adds a /release skill for updating CHANGELOG.md and module manifest versions"
+    },
+    {
+      "name": "architecture-decisions",
+      "source": "./plugins/architecture-decisions",
+      "description": "Adds an /adr skill for creating and managing Architecture Decision Records and RFCs"
     }
   ]
 }
