@@ -18,6 +18,11 @@
       "name": "architecture-decisions",
       "source": "./plugins/architecture-decisions",
       "description": "Adds an /adr skill for creating and managing Architecture Decision Records and RFCs"
+    },
+    {
+      "name": "pester-testing",
+      "source": "./plugins/pester-testing",
+      "description": "Adds pester-write, pester-review, and pester-run skills for writing, reviewing, and running Pester 5 tests in PowerShell"
     }
   ]
 }
