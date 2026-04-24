@@ -1,0 +1,38 @@
+{
+  "name": "pester-testing",
+  "description": "Write, review, and run Pester 5 tests in PowerShell with LLM-optimized output.",
+  "version": "1.0.0",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "shell": "powershell",
+            "if": "Bash(git commit *)",
+            "command": "if(-not(Get-Module Pester -ListAvailable|Where-Object{$_.Version -ge [version]'5.0'})){Write-Warning 'Pester 5 not installed, skipping pre-commit check.';exit 0};$cfg=New-PesterConfiguration;$cfg.Output.Verbosity.Value='Normal';$cfg.Run.PassThru.Value=$true;$r=Invoke-Pester -Configuration $cfg;if($r.FailedCount -gt 0){Write-Host(\"Commit blocked: $($r.FailedCount) Pester test(s) failed. Fix before committing.\") -ForegroundColor Red;exit 1}",
+            "statusMessage": "Checking Pester tests before commit...",
+            "timeout": 120
+          }
+        ]
+      }
+    ]
+  },
+  "commands": {
+    "pester": {
+      "description": "Run Pester 5 tests with agent-optimized output (failures and summary only). Accepts an optional path and tag filter arguments.",
+      "argumentHint": "[path] [-Tag <name>] [-ExcludeTag <name>]",
+      "allowedTools": ["PowerShell(*)"],
+      "content": "Run Pester 5 tests using the pester-run workflow.\n\n## Parsing Arguments\n\nParse `$ARGUMENTS` if provided:\n- A `.Tests.ps1` path → set `$cfg.Run.Path.Value`\n- `-Tag <name>` → set `$cfg.Filter.Tag.Value = @('<name>')`\n- `-ExcludeTag <name>` → set `$cfg.Filter.ExcludeTag.Value = @('<name>')`\n- No arguments → run all `*.Tests.ps1` files discovered from the current directory\n\n## Execution\n\nBuild a `New-PesterConfiguration` with `Output.Verbosity.Value = 'Normal'` and `Run.PassThru.Value = $true`. Apply any filters. Run with `Invoke-Pester -Configuration $cfg`.\n\n## Reporting\n\n- All pass: `All N tests passed (X.Xs)`\n- Failures: one line per failure showing the full test path and assertion error, then the summary line (`Passed: N | Failed: N | Skipped: N`)"
+    }
+  },
+  "monitors": [
+    {
+      "name": "pester-file-watcher",
+      "command": "mkdir -p \"${CLAUDE_PLUGIN_DATA}\" && stamp=\"${CLAUDE_PLUGIN_DATA}/watch-stamp\"; touch \"$stamp\"; while true; do sleep 2; find . -name '*.Tests.ps1' -newer \"$stamp\" 2>/dev/null | while IFS= read -r f; do echo \"Test file changed: $f\"; done; touch \"$stamp\"; done",
+      "description": "Watch for changes to Pester test files (*.Tests.ps1) and deliver a notification on each change.",
+      "when": "always"
+    }
+  ]
+}
