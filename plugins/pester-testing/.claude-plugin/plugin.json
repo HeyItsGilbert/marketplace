@@ -10,7 +10,8 @@
           {
             "type": "command",
             "shell": "powershell",
-            "command": "$tool=$Env:CLAUDE_TOOL_INPUT_JSON|ConvertFrom-Json -ErrorAction SilentlyContinue; if($tool -and $tool.command -match '\\bgit\\s+commit\\b'){if(-not(Get-Module Pester -ListAvailable|Where-Object{$_.Version -ge [version]'5.0'})){Write-Warning 'Pester 5 not installed, skipping pre-commit check.';exit 0};$cfg=New-PesterConfiguration;$cfg.Output.Verbosity.Value='Normal';$cfg.Run.PassThru.Value=$true;$r=Invoke-Pester -Configuration $cfg;if($r.FailedCount -gt 0){Write-Host(\"Commit blocked: $($r.FailedCount) Pester test(s) failed. Fix before committing.\") -ForegroundColor Red;exit 1}}",
+            "if": "Bash(git commit *)",
+            "command": "if(-not(Get-Module Pester -ListAvailable|Where-Object{$_.Version -ge [version]'5.0'})){Write-Warning 'Pester 5 not installed, skipping pre-commit check.';exit 0};$cfg=New-PesterConfiguration;$cfg.Output.Verbosity.Value='Normal';$cfg.Run.PassThru.Value=$true;$r=Invoke-Pester -Configuration $cfg;if($r.FailedCount -gt 0){Write-Host(\"Commit blocked: $($r.FailedCount) Pester test(s) failed. Fix before committing.\") -ForegroundColor Red;exit 1}",
             "statusMessage": "Checking Pester tests before commit...",
             "timeout": 120
           }
