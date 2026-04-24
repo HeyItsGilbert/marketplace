@@ -28,6 +28,11 @@
       "name": "code-review-team",
       "source": "./plugins/code-review-team",
       "description": "Seven-perspective code review team with named personas that review your PR diff in parallel"
+    },
+    {
+      "name": "static-site-tools",
+      "source": "./plugins/static-site-tools",
+      "description": "Adds an /og-image-design skill with OG image guidelines, platform specs, HTML templates, and meta tag best practices"
     }
   ]
 }
