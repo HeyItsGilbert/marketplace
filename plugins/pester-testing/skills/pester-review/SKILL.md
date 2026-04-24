@@ -1,7 +1,7 @@
 ---
 name: pester-review
 description: Review existing Pester test files for correctness, idiomatic Pester 5 usage, coverage gaps, and quality. Use when the user asks to review, audit, improve, or grade their Pester tests. Activate when asked whether tests are good, to find gaps in test coverage, to check a *.Tests.ps1 file for issues, to migrate from Pester v4 to v5, to improve test names, or to verify tests would actually catch regressions. Trigger phrases: "review my tests", "are these tests good", "audit test coverage", "improve pester tests", "check my test file", "v4 to v5 migration", "pester migration", "fix test patterns", "test quality review", "what am I missing in my tests", "are my tests idiomatic". Also activate when shown a *.Tests.ps1 file and asked for feedback or a second opinion. Do NOT use for: writing new tests (use pester-write), running tests (use pester-run), or reviewing non-test PowerShell code.
-allowed-tools: Bash(pwsh *), Bash(powershell *), Bash(find *), Bash(git diff *)
+allowed-tools: PowerShell(*), Bash(find *), Bash(git diff *)
 ---
 
 # Pester 5 Test Reviewer

@@ -22,7 +22,7 @@
     "pester": {
       "description": "Run Pester 5 tests with agent-optimized output (failures and summary only). Accepts an optional path and tag filter arguments.",
       "argumentHint": "[path] [-Tag <name>] [-ExcludeTag <name>]",
-      "allowedTools": ["Bash(pwsh *)", "Bash(powershell *)"],
+      "allowedTools": ["PowerShell(*)"],
       "content": "Run Pester 5 tests using the pester-run workflow.\n\n## Parsing Arguments\n\nParse `$ARGUMENTS` if provided:\n- A `.Tests.ps1` path → set `$cfg.Run.Path.Value`\n- `-Tag <name>` → set `$cfg.Filter.Tag.Value = @('<name>')`\n- `-ExcludeTag <name>` → set `$cfg.Filter.ExcludeTag.Value = @('<name>')`\n- No arguments → run all `*.Tests.ps1` files discovered from the current directory\n\n## Execution\n\nBuild a `New-PesterConfiguration` with `Output.Verbosity.Value = 'Normal'` and `Run.PassThru.Value = $true`. Apply any filters. Run with `Invoke-Pester -Configuration $cfg`.\n\n## Reporting\n\n- All pass: `All N tests passed (X.Xs)`\n- Failures: one line per failure showing the full test path and assertion error, then the summary line (`Passed: N | Failed: N | Skipped: N`)"
     }
   },

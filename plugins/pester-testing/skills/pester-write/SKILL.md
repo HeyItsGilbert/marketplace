@@ -1,7 +1,7 @@
 ---
 name: pester-write
 description: Write Pester 5 test files for PowerShell functions, modules, scripts, DSC resources, or classes. Use when the user asks to write tests, add test coverage, create a test file, scaffold *.Tests.ps1, or generate Pester specs. Also activate when asked to test a specific function, cover an edge case, write a mock, add unit tests, add integration tests, or test a changed function. Trigger phrases include "write Pester tests", "add tests for", "create a test file", "test coverage", "unit tests for", "mock this dependency", "Pester spec", "test this function", "scaffold tests". PROACTIVELY suggest writing tests when the user adds or modifies a PowerShell function or module without updating a corresponding test file. Works with any PowerShell project type: modules (.psm1/.psd1), standalone scripts (.ps1), DSC resources, Azure Functions, or class-based modules. Both Windows PowerShell 5.1 and PowerShell 7+ are supported. Do NOT use for: running tests (use pester-run), reviewing existing test quality (use pester-review), CI/CD test pipeline configuration, or non-Pester frameworks.
-allowed-tools: Bash(pwsh *), Bash(powershell *), Bash(find *), Bash(git diff *), Bash(git log *)
+allowed-tools: PowerShell(*), Bash(find *), Bash(git diff *), Bash(git log *)
 ---
 
 # Pester 5 Test Writer
