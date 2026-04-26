@@ -33,6 +33,11 @@
       "name": "static-site-tools",
       "source": "./plugins/static-site-tools",
       "description": "Adds an /og-image-design skill with OG image guidelines, platform specs, HTML templates, and meta tag best practices"
+    },
+    {
+      "name": "copy-editor",
+      "source": "./plugins/copy-editor",
+      "description": "Adds a /copy-edit skill for writing and editing blog posts, LinkedIn posts, Bluesky posts, emails, social media replies, and other copy in Gilbert's voice"
     }
   ]
 }
