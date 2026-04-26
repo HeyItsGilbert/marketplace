@@ -122,6 +122,37 @@ Run from the project root so `$PSCommandPath`-relative imports and module paths 
 | `Detailed` | All test names with pass/fail status | Interactive debugging |
 | `Diagnostic` | Internal Pester state + debug messages | Diagnosing Pester itself |
 
+## Code Coverage
+
+When `${user_config.coverageThreshold}` is greater than 0, enable coverage tracking alongside the standard run:
+
+```powershell
+$cfg = New-PesterConfiguration
+$cfg.Output.Verbosity.Value                   = 'Normal'
+$cfg.Run.PassThru.Value                       = $true
+$cfg.CodeCoverage.Enabled.Value               = $true
+$cfg.CodeCoverage.CoveragePercentTarget.Value = ${user_config.coverageThreshold}
+$cfg.CodeCoverage.Path.Value                  = @('./src/*.ps1', './src/*.psm1')  # adjust to project
+$result = Invoke-Pester -Configuration $cfg
+```
+
+Coverage results live in `$result.CodeCoverage`:
+
+| Property | Description |
+|---|---|
+| `$result.CodeCoverage.CoveragePercent` | Actual coverage percentage achieved |
+| `$result.CodeCoverage.CommandsMissedCount` | Uncovered commands |
+| `$result.CodeCoverage.CommandsExecutedCount` | Covered commands |
+
+Report coverage inline with test results:
+
+```
+Coverage: 73.2% (target: ${user_config.coverageThreshold}%) ⚠ Below threshold
+Missed: 12 commands — Get-Widget.ps1:42, Invoke-Sync.ps1:88, Export-Report.ps1:31
+```
+
+Skip coverage for focused runs (tag-filtered, single-file, quick feedback) — it adds overhead and means less on a subset. Enable it for full-suite runs where you want a coverage gate.
+
 ## Common Failure Patterns
 
 When `$result.FailedCount -gt 0`, match the error message before reporting to help the user understand root cause:

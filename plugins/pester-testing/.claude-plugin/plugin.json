@@ -1,7 +1,7 @@
 {
   "name": "pester-testing",
   "description": "Write, review, and run Pester 5 tests in PowerShell with LLM-optimized output.",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "hooks": {
     "PreToolUse": [
       {
@@ -14,6 +14,19 @@
             "command": "if(-not(Get-Module Pester -ListAvailable|Where-Object{$_.Version -ge [version]'5.0'})){Write-Warning 'Pester 5 not installed, skipping pre-commit check.';exit 0};$cfg=New-PesterConfiguration;$cfg.Output.Verbosity.Value='Normal';$cfg.Run.PassThru.Value=$true;$r=Invoke-Pester -Configuration $cfg;if($r.FailedCount -gt 0){Write-Host(\"Commit blocked: $($r.FailedCount) Pester test(s) failed. Fix before committing.\") -ForegroundColor Red;exit 1}",
             "statusMessage": "Checking Pester tests before commit...",
             "timeout": 120
+          }
+        ]
+      }
+    ],
+    "FileChanged": [
+      {
+        "matcher": "\\.Tests\\.ps1$",
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "The Pester test file $ARGUMENTS was just modified. Run the tests in that specific file using the pester-run skill and report results concisely.",
+            "async": true,
+            "statusMessage": "Running Pester for modified test file..."
           }
         ]
       }
@@ -34,5 +47,46 @@
       "description": "Watch for changes to Pester test files (*.Tests.ps1) and deliver a notification on each change.",
       "when": "always"
     }
-  ]
+  ],
+  "userConfig": {
+    "coverageThreshold": {
+      "type": "number",
+      "title": "Code Coverage Threshold (%)",
+      "description": "Minimum acceptable code coverage percentage. When greater than 0, Pester enables coverage tracking and warns if results fall below this value. Set to 0 to disable.",
+      "default": 80,
+      "min": 0,
+      "max": 100
+    },
+    "psesPath": {
+      "type": "directory",
+      "title": "PowerShell Editor Services Bundle Path",
+      "description": "Path to the directory containing the PowerShellEditorServices folder. Found at ~/.vscode/extensions/ms-vscode.powershell-<ver>/modules, or extract from https://github.com/PowerShell/PowerShellEditorServices/releases. Leave blank to disable LSP.",
+      "required": false
+    }
+  },
+  "lspServers": {
+    "powershell": {
+      "command": "pwsh",
+      "args": [
+        "-NoLogo",
+        "-NoProfile",
+        "-Command",
+        "$b='${user_config.psesPath}';if(-not $b){exit 0};& \"$b/PowerShellEditorServices/Start-EditorServices.ps1\" -BundledModulesPath \"$b\" -LogPath '${CLAUDE_PLUGIN_DATA}/pses.log' -LogLevel Normal -SessionDetailsPath '${CLAUDE_PLUGIN_DATA}/pses.session.json' -HostName 'claude-code' -HostProfileId 'claude-code' -HostVersion '1.0.0' -FeatureFlags @() -AdditionalModules @() -Stdio -LanguageServiceOnly"
+      ],
+      "extensionToLanguage": {
+        ".ps1": "powershell",
+        ".psm1": "powershell",
+        ".psd1": "powershell"
+      },
+      "transport": "stdio",
+      "restartOnCrash": true,
+      "maxRestarts": 3,
+      "startupTimeout": 30000,
+      "settings": {
+        "powershell.scriptAnalysis.enable": true,
+        "powershell.pester.useLegacyCodeLens": false,
+        "powershell.pester.outputVerbosity": "FromPreference"
+      }
+    }
+  }
 }
