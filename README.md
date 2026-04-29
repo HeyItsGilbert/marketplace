@@ -5,10 +5,18 @@ custom skills.
 
 ## Available Plugins
 
-| Plugin                | Skill           | Description                                                                         |
-|-----------------------|-----------------|-------------------------------------------------------------------------------------|
-| `presentation-review` | `/death-by-ppt` | Review MARP presentations for "Death by PowerPoint" issues                          |
-| `release-manager`     | `/release`      | Update CHANGELOG.md and bump project versions following Keep a Changelog and SemVer |
+| Plugin                    | Skill / Command   | Description                                                                                   |
+|---------------------------|-------------------|-----------------------------------------------------------------------------------------------|
+| `architecture-decisions`  | `/adr`            | Create and manage Architecture Decision Records committed to the repo                         |
+| `architecture-decisions`  | `/rfc`            | Draft and manage Requests for Comments for decisions that need team discussion                 |
+| `code-review-team`        | `/team-review`    | Seven-perspective parallel code review (Staff SWE, Architect, Nitpicker, Junior, Grey Hat, Docs, Test Strategist) |
+| `copy-editor`             | `/copy-edit`      | Write, brainstorm, polish, and review content while preserving Gilbert's voice                |
+| `pester-testing`          | `/pester-write`   | Write Pester 5 test files for PowerShell functions, modules, and scripts                      |
+| `pester-testing`          | `/pester-review`  | Review existing Pester tests for correctness, idiomatic usage, and coverage gaps              |
+| `pester-testing`          | `/pester-run`     | Run Pester 5 tests with agent-optimized output (failures and summary only)                    |
+| `presentation-review`     | `/death-by-ppt`   | Review MARP presentations for "Death by PowerPoint" issues                                    |
+| `release-manager`         | `/release`        | Update CHANGELOG.md and bump project versions following Keep a Changelog and SemVer           |
+| `static-site-tools`       | `/og-image-design`| Design Open Graph and social sharing images with platform specs and HTML templates            |
 
 ## Installation
 
