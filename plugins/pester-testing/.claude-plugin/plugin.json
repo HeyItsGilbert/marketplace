@@ -1,7 +1,7 @@
 {
   "name": "pester-testing",
-  "description": "Write, review, and run Pester 5 tests in PowerShell with LLM-optimized output.",
-  "version": "1.1.0",
+  "description": "Write, review, and run Pester 5 tests in PowerShell with LLM-optimized output. Includes ready-to-use patterns for mocking file systems, REST APIs, credentials, and DSC resources.",
+  "version": "1.2.0",
   "hooks": {
     "PreToolUse": [
       {
