@@ -1,4 +1,5 @@
 {
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "code-review-team",
   "version": "1.0.0",
   "description": "Seven-perspective code review team: Jordan B. (Staff SWE), Sage (Architect), Brent Tlackburn (Nitpicker), Chip (Junior Dev), DualCore (Grey Hat), Shawn Wee!-ler (Docs), and Glenn (Test Strategist) review code in parallel with distinct personalities and focus areas",

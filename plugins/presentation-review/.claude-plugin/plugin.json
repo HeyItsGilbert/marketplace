@@ -1,4 +1,5 @@
 {
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "presentation-review",
   "description": "Adds a /death-by-ppt skill for reviewing MARP presentations",
   "version": "1.0.0"

@@ -56,3 +56,7 @@ To rerun evals: `bash create-test-repos.sh` to regenerate repos, clone into a ne
 - Skill names use kebab-case (e.g., `death-by-ppt`).
 - Plugin names use kebab-case (e.g., `presentation-review`).
 - The `source` field in the marketplace manifest uses relative paths prefixed with `./`.
+
+## Hooks
+
+Prefer commands to be PowerShell scripts. They should have matching Pester tests to validate.
