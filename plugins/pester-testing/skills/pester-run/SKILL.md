@@ -10,8 +10,8 @@ Run Pester 5 tests with agent-optimized output: failures and summary only.
 
 ## Efficiency Guidelines
 
-- Always use `New-PesterConfiguration` with `Run.PassThru.Value = $true` — this gives you a structured result object so you can check `$result.FailedCount` rather than parsing text output.
-- Set `Output.Verbosity.Value = 'Normal'` for all agent runs. This suppresses passing-test lines while showing full failure details and the final summary.
+- Always use `New-PesterConfiguration` with `Run.PassThru = $true` — this gives you a structured result object so you can check `$result.FailedCount` rather than parsing text output.
+- Set `Output.Verbosity = 'Normal'` for all agent runs. This suppresses passing-test lines while showing full failure details and the final summary.
 - Run a focused subset first (by tag or path) when verifying a specific change. Run the full suite only to confirm a branch is clean.
 - Never re-run after a clean pass — report success and stop.
 
@@ -21,8 +21,8 @@ Run Pester 5 tests with agent-optimized output: failures and summary only.
 
 ```powershell
 $cfg = New-PesterConfiguration
-$cfg.Output.Verbosity.Value = 'Normal'
-$cfg.Run.PassThru.Value     = $true
+$cfg.Output.Verbosity = 'Normal'
+$cfg.Run.PassThru     = $true
 $result = Invoke-Pester -Configuration $cfg
 ```
 
@@ -30,9 +30,9 @@ $result = Invoke-Pester -Configuration $cfg
 
 ```powershell
 $cfg = New-PesterConfiguration
-$cfg.Run.Path.Value         = './tests/Get-Widget.Tests.ps1'
-$cfg.Output.Verbosity.Value = 'Normal'
-$cfg.Run.PassThru.Value     = $true
+$cfg.Run.Path         = './tests/Get-Widget.Tests.ps1'
+$cfg.Output.Verbosity = 'Normal'
+$cfg.Run.PassThru     = $true
 $result = Invoke-Pester -Configuration $cfg
 ```
 
@@ -40,10 +40,10 @@ $result = Invoke-Pester -Configuration $cfg
 
 ```powershell
 $cfg = New-PesterConfiguration
-$cfg.Filter.Tag.Value        = @('Unit')
-$cfg.Filter.ExcludeTag.Value = @('Slow', 'Integration')
-$cfg.Output.Verbosity.Value  = 'Normal'
-$cfg.Run.PassThru.Value      = $true
+$cfg.Filter.Tag        = @('Unit')
+$cfg.Filter.ExcludeTag = @('Slow', 'Integration')
+$cfg.Output.Verbosity  = 'Normal'
+$cfg.Run.PassThru      = $true
 $result = Invoke-Pester -Configuration $cfg
 ```
 
@@ -51,9 +51,9 @@ $result = Invoke-Pester -Configuration $cfg
 
 ```powershell
 $cfg = New-PesterConfiguration
-$cfg.Filter.FullName.Value  = '*Get-Widget*returns*'
-$cfg.Output.Verbosity.Value = 'Normal'
-$cfg.Run.PassThru.Value     = $true
+$cfg.Filter.FullName  = '*Get-Widget*returns*'
+$cfg.Output.Verbosity = 'Normal'
+$cfg.Run.PassThru     = $true
 $result = Invoke-Pester -Configuration $cfg
 ```
 
@@ -128,11 +128,11 @@ When `${user_config.coverageThreshold}` is greater than 0, enable coverage track
 
 ```powershell
 $cfg = New-PesterConfiguration
-$cfg.Output.Verbosity.Value                   = 'Normal'
-$cfg.Run.PassThru.Value                       = $true
-$cfg.CodeCoverage.Enabled.Value               = $true
-$cfg.CodeCoverage.CoveragePercentTarget.Value = ${user_config.coverageThreshold}
-$cfg.CodeCoverage.Path.Value                  = @('./src/*.ps1', './src/*.psm1')  # adjust to project
+$cfg.Output.Verbosity                   = 'Normal'
+$cfg.Run.PassThru                       = $true
+$cfg.CodeCoverage.Enabled               = $true
+$cfg.CodeCoverage.CoveragePercentTarget = ${user_config.coverageThreshold}
+$cfg.CodeCoverage.Path                  = @('./src/*.ps1', './src/*.psm1')  # adjust to project
 $result = Invoke-Pester -Configuration $cfg
 ```
 
