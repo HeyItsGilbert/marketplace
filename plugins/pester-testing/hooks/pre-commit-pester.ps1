@@ -1,7 +1,10 @@
 #Requires -Version 7.0
-#Requires -Modules ClaudeHooks
 [CmdletBinding()]
 param()
+
+if (-not (Get-Module -ListAvailable ClaudeHooks)) {
+    Install-Module ClaudeHooks -Scope CurrentUser -Force
+}
 
 function Get-StagedPowerShellFile {
     git diff --cached --name-only --diff-filter=ACMR |
