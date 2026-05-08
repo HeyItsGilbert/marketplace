@@ -38,6 +38,11 @@
       "name": "copy-editor",
       "source": "./plugins/copy-editor",
       "description": "Adds a /copy-edit skill for writing and editing blog posts, LinkedIn posts, Bluesky posts, emails, social media replies, and other copy in Gilbert's voice"
+    },
+    {
+      "name": "psmodule-automation",
+      "source": "./plugins/psmodule-automation",
+      "description": "Adds a /ralph skill that generates iterative AI automation for PowerShell modules — tracker, prompt file, and orchestrator script for Claude, Copilot, or Codex CLI"
     }
   ]
 }

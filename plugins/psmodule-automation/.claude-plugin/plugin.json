@@ -1,0 +1,6 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "psmodule-automation",
+  "description": "Generates Ralph-style iterative automation for PowerShell modules — tracker, prompt file, and orchestrator script for Claude, Copilot, or Codex CLI.",
+  "version": "1.0.0"
+}
