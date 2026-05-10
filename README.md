@@ -14,35 +14,24 @@ custom skills.
 | `pester-testing`          | `/pester-write`   | Write Pester 5 test files for PowerShell functions, modules, and scripts                      |
 | `pester-testing`          | `/pester-review`  | Review existing Pester tests for correctness, idiomatic usage, and coverage gaps              |
 | `pester-testing`          | `/pester-run`     | Run Pester 5 tests with agent-optimized output (failures and summary only)                    |
+| `pester-testing`          | `/pester-patterns`| Ready-to-use Pester 5 recipes — mocks for filesystem, REST, credentials, DSC, and more        |
 | `presentation-review`     | `/death-by-ppt`   | Review MARP presentations for "Death by PowerPoint" issues                                    |
 | `release-manager`         | `/release`        | Update CHANGELOG.md and bump project versions following Keep a Changelog and SemVer           |
 | `static-site-tools`       | `/og-image-design`| Design Open Graph and social sharing images with platform specs and HTML templates            |
 
 ## Installation
 
-Install the entire marketplace or individual plugins using the Claude Code CLI:
+Add this marketplace inside Claude Code, then install the plugins you want:
 
-```bash
-# Install all plugins from this marketplace
-claude plugin add HeyItsGilbert/marketplace
-
-# Or install a single plugin
-claude plugin add presentation-review@marketplace
+```text
+/plugin marketplace add HeyItsGilbert/marketplace
+/plugin install pester-testing@my-plugins
 ```
 
-You can also install directly from a Git URL:
-
-```bash
-# Install all plugins
-claude plugin add https://github.com/HeyItsGilbert/marketplace
-
-# Install a single plugin
-claude plugin add https://github.com/HeyItsGilbert/marketplace/plugins/release-manager
-```
-
-Once installed, skills are available in any Claude Code session. Type the skill
-name (e.g. `/release`) or describe what you want and Claude will activate the
-matching skill automatically.
+Browse and toggle plugins interactively with `/plugin`. Once installed, skills
+are available in any Claude Code session — type the skill name (e.g.
+`/release`) or describe what you want and Claude will activate the matching
+skill automatically.
 
 ## Repository Structure
 
