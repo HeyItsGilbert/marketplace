@@ -1,6 +1,6 @@
 ---
 name: release
-description: Prepare a release by updating CHANGELOG.md and bumping the project version in manifests (package.json, *.psd1, pyproject.toml, Cargo.toml, *.csproj). Follows Keep a Changelog and Semantic Versioning. Use this skill whenever the user wants to cut, ship, or prep a release, bump a version, update a changelog for a new version, prepare a hotfix release, do a first stable release (0.x to 1.0), or normalize a non-standard version to semver. Covers any phrasing like "prepare the release", "version bump", "update changelog", "ship a new version", "cut a release", "go 1.0", or "prep a new version". This skill does the actual file updates and commit — not CI/CD automation, release tooling configuration, changelog reading, version rollbacks, or git tagging.
+description: Prepare a release — update CHANGELOG.md and bump the version in manifests (package.json, *.psd1, pyproject.toml, Cargo.toml, *.csproj). Follows Keep a Changelog and SemVer. Use when the user wants to cut, ship, or prep a release, bump a version, do a first stable release (0.x→1.0), prep a hotfix, or normalize a non-semver version. Triggers: "prepare the release", "version bump", "update changelog", "cut a release", "ship a new version", "go 1.0". Does the file edits and commit — not CI/CD config, tooling, rollbacks, or git tagging.
 allowed-tools: Bash(git log *), Bash(git diff *), Bash(git add *), Bash(git commit *), Bash(git status *), Bash(git checkout *), Bash(git branch *), Bash(gh pr *)
 ---
 

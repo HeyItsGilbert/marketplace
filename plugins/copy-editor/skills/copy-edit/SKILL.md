@@ -1,6 +1,6 @@
 ---
 name: copy-edit
-description: This skill should be used when Gilbert is drafting, editing, or polishing any written content -- blog posts, emails, LinkedIn posts, Bluesky posts, social media replies, announcements, or newsletters. Activate when Gilbert is working on content, says "make this better," shares rough notes to turn into something, wants feedback on tone, needs a headline, asks about SEO for a post, or asks to write something from scratch. Always activate for any writing or copywriting task -- Gilbert's voice is specific and must be preserved every time.
+description: Copy editor for Gilbert's writing — blog posts, emails, LinkedIn, Bluesky, social replies, announcements, newsletters. Use when drafting, editing, polishing, or writing from scratch, or for tone feedback, headlines, or SEO review. Triggers: "make this better", "polish this", "rewrite", "edit this post", "headline", "SEO". Always activate for writing tasks — Gilbert's voice must be preserved.
 allowed-tools: AskUserQuestion
 ---
 

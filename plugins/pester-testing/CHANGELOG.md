@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.1] - 2026-05-10
+
+### Changed
+
+- Tightened skill descriptions across `pester-write`, `pester-review`,
+  `pester-run`, and `pester-patterns` for sharper trigger matching
+- Extracted detailed `pester-patterns` recipes into
+  `references/patterns.md`, leaving the SKILL.md as a slim index that
+  loads the references on demand (progressive disclosure)
+
 ## [1.4.0] - 2026-05-04
 
 ### Changed

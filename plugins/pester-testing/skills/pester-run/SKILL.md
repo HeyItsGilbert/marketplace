@@ -1,6 +1,6 @@
 ---
 name: pester-run
-description: Run Pester 5 tests in PowerShell and report results in a format optimized for agents — failures and summary only, no passing-test noise. Use when asked to run tests, execute the test suite, check if tests pass, run a specific test file, run tests with a tag filter, verify a change didn't break anything, or find out which tests are currently failing. Trigger phrases: "run the tests", "run Pester", "execute the test suite", "check if tests pass", "run unit tests", "run integration tests", "does this break any tests", "what tests are failing", "run only the smoke tests", "run tests for this function", "are all tests green". This skill focuses on invocation and result interpretation. Do NOT use for: writing new tests (use pester-write) or reviewing test quality (use pester-review).
+description: Run Pester 5 tests with agent-optimized output — failures and summary only, no passing-test noise. Use when asked to run tests, execute the test suite, run a specific file, filter by tag, verify a change, or find what's failing. Triggers: "run the tests", "run Pester", "execute the test suite", "check if tests pass", "what tests are failing", "are all tests green", "does this break any tests". Not for writing tests (use pester-write) or reviewing quality (use pester-review).
 allowed-tools: PowerShell(*), Bash(find *)
 ---
 
