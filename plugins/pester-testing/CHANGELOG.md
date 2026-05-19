@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.5.0] - 2026-05-18
+
+### Added
+
+- Pattern 14: Mocking Commands from an Unavailable External Module — three
+  rules derived from real failures: stub signatures must match what production
+  code splats; `Mock Get-Command` in `BeforeAll` breaks all subsequent mocks
+  in that block (safe only in `It`); filtered mocks must live in a `BeforeAll`
+  inside their `Context` or the outer unfiltered mock wins
+
 ## [1.4.1] - 2026-05-10
 
 ### Changed
