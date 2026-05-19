@@ -629,6 +629,132 @@ Describe 'ConvertFrom-MyXml' -Tag 'Unit' {
 }
 ```
 
+## Pattern 14: Mocking Commands from an Unavailable External Module
+
+When testing code that calls cmdlets from an optional or environment-specific
+module (e.g. `Microsoft.PowerShell.PSResourceGet`, a vendor SDK, or any module
+not installed in CI), three non-obvious rules apply.
+
+### Rule 1 — Stub signatures must match what the production code splats
+
+Pester builds its mock proxy from the *stub function's* parameter list. If the
+stub has no parameters, `(Get-Command 'Install-PSResource').Parameters` returns
+an empty dict. Any production-code loop that filters a splat against that dict
+will silently strip every argument before the mock is invoked — leaving
+`ParameterFilter` assertions permanently failing with "called 0 times."
+
+Define stubs with the parameters your code actually passes:
+
+```powershell
+BeforeAll {
+    InModuleScope MyModule {
+        function Install-PSResource {
+            [CmdletBinding()] param(
+                [string]$Name, [string]$Version, [string]$Repository,
+                [switch]$TrustRepository, [switch]$NoClobber,
+                [switch]$AcceptLicense, [switch]$Prerelease,
+                [PSCredential]$Credential, [string]$Scope
+            )
+        }
+        function Save-PSResource {
+            [CmdletBinding()] param(
+                [string]$Name, [string]$Version, [string]$Repository,
+                [switch]$TrustRepository, [switch]$NoClobber,
+                [switch]$AcceptLicense, [switch]$Prerelease,
+                [PSCredential]$Credential, [string]$Path
+            )
+        }
+
+        Mock Install-PSResource { }
+        Mock Save-PSResource    { }
+    }
+}
+```
+
+### Rule 2 — Never mock `Get-Command` in `BeforeAll`
+
+Pester calls `Get-Command` internally when building mock proxies. If you mock
+`Get-Command` in a `BeforeAll` block, those calls return your fake
+`PSCustomObject` instead of a real `CommandInfo` — and every subsequent `Mock`
+in that block silently breaks with "Mock data are not setup for this scope."
+
+`Mock Get-Command` is safe only inside an **`It` block**, where all BeforeAll
+mock setup has already completed. Use it to test an availability-guard branch:
+
+```powershell
+# WRONG — breaks all mocks set up after this line
+BeforeAll {
+    InModuleScope MyModule {
+        Mock Get-Command { [PSCustomObject]@{ Name = 'Install-PSResource' } } `
+            -ParameterFilter { $Name -eq 'Install-PSResource' }
+        Mock Install-PSResource { }   # never registered correctly
+    }
+}
+
+# RIGHT — stub makes the command discoverable for all other tests;
+# mock Get-Command only in the specific It that tests the guard
+BeforeAll {
+    InModuleScope MyModule {
+        function Install-PSResource { [CmdletBinding()] param([string]$Name) }
+        Mock Install-PSResource { }
+    }
+}
+
+Context 'Availability guard' {
+    It 'Returns early when Install-PSResource is missing' {
+        InModuleScope MyModule {
+            Mock Get-Command { } -ParameterFilter { $Name -eq 'Install-PSResource' }
+        }
+        InModuleScope MyModule -Parameters @{ Script = $script:ScriptPath } {
+            & $Script -ErrorAction SilentlyContinue
+        }
+        Should -Invoke -CommandName Install-PSResource -ModuleName MyModule -Times 0
+    }
+}
+```
+
+### Rule 3 — Filtered mocks must be in `BeforeAll`, not inline in `It`
+
+When a `Describe`-level mock has no `ParameterFilter` and a later `It`-inline
+mock adds one for the same command, the unfiltered mock wins — Pester evaluates
+the broader (outer-scope) mock first when both live in the same module scope.
+
+Move the filtered override into a `BeforeAll` inside its `Context`:
+
+```powershell
+# WRONG — the unfiltered Describe-level mock wins for 'BogusRepo' calls
+Describe 'MyScript' {
+    BeforeAll {
+        InModuleScope MyModule {
+            Mock Get-PSResourceRepository { [PSCustomObject]@{ Name = 'PSGallery' } }
+        }
+    }
+    It 'Errors on unknown repo' {
+        InModuleScope MyModule {
+            Mock Get-PSResourceRepository { } -ParameterFilter { $Name -eq 'BogusRepo' }
+        }
+        # ... install still runs because the unfiltered mock matched first
+    }
+}
+
+# RIGHT — Context BeforeAll gives the filtered mock its own scope layer
+Describe 'MyScript' {
+    BeforeAll {
+        InModuleScope MyModule {
+            Mock Get-PSResourceRepository { [PSCustomObject]@{ Name = 'PSGallery' } }
+        }
+    }
+    Context 'Repository validation' {
+        BeforeAll {
+            InModuleScope MyModule {
+                Mock Get-PSResourceRepository { } -ParameterFilter { $Name -eq 'BogusRepo' }
+            }
+        }
+        It 'Errors on unknown repo' { ... }
+    }
+}
+```
+
 ## Quick Reference: Mock Cheat Sheet
 
 | What to Mock | Mock Command | Key Detail |
