@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-06-13
+
+### Added
+
+- CHANGELOG section-name enforcement by release type: patch releases
+  are restricted to `Fixed` and `Security`; minor releases add
+  `Added`, `Changed`, `Deprecated`; major releases also allow
+  `Removed`; non-standard headings (`Docs`, `Chore`, `Misc`, etc.)
+  are blocked entirely
+- Post-draft validation step: after writing a changelog entry the
+  skill scans every `###` heading and confirms compliance before
+  committing
+- Patch-release warning when `feat:` / `Added` commits appear in a
+  patch entry, prompting a minor-bump or collapsing under `### Fixed`
+
 ## [1.0.1] - 2026-05-10
 
 ### Changed

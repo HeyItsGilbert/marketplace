@@ -100,13 +100,27 @@ Determine the bump level using this approach, in order:
 - If this is the first release and no CHANGELOG.md exists, create one
   with the Keep a Changelog header format, including an
   `## [Unreleased]` section.
-- Categorize changes using Keep a Changelog categories:
-  - **Added** — new features
-  - **Changed** — changes in existing functionality
-  - **Deprecated** — soon-to-be removed features
-  - **Removed** — removed features
-  - **Fixed** — bug fixes
-  - **Security** — vulnerability fixes
+- Categorize changes using Keep a Changelog categories. The allowed
+  `###` headings depend on the release type:
+
+  | Release type            | Allowed `###` sections                                      |
+  |-------------------------|-------------------------------------------------------------|
+  | Patch (x.y.N, N > 0)   | `Fixed`, `Security` only                                    |
+  | Minor (x.y.0, y > 0)   | `Added`, `Changed`, `Deprecated`, `Fixed`, `Security`       |
+  | Major (x.0.0)           | All of the above + `Removed`                                |
+  | `[Unreleased]`          | All sections                                                |
+
+  Non-standard headings (`Docs`, `Chore`, `Misc`, `Internal`, etc.)
+  are **never** allowed.
+
+  **Patch release rule:** If the commit history contains `feat:` /
+  `Added` items and you are writing a patch entry, emit a warning that
+  those changes normally warrant a MINOR bump, then collapse them under
+  `### Fixed` (or prompt the user to bump to a minor version instead).
+
+- After drafting the CHANGELOG entry, scan every `###` heading in the
+  new section and confirm it is on the allowed list for this release
+  type. If any heading is non-compliant, fix it before committing.
 - Only include categories that have entries.
 - Keep lines to 80 characters or fewer.
 - Preserve any manual edits if re-running.
