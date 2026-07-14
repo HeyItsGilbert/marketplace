@@ -49,14 +49,20 @@ These patterns show up most in emails, announcements, and anything audience-faci
 
 ## Forbidden Characters
 
-Never use these in suggestions or rewrites -- they signal AI-generated content:
+These signal AI-generated content. Always emit the ASCII form instead.
 
-- Smart/curly quotes: ' ' " "
-- Em dashes: --
+Codepoints are authoritative -- the glyphs in this table are the very characters
+the rule bans, so any pass that "cleans up" this file can flatten them and leave
+the rule reading as a tautology. If the Forbidden and Use-instead glyphs ever
+look identical, trust the codepoints.
 
-Use instead:
-- Straight quotes: ' "
-- Hyphens: - or double hyphens --
+| Forbidden              | Codepoint | Use instead                  |
+|------------------------|-----------|------------------------------|
+| Left single quote `‘`  | U+2018    | Straight apostrophe `'` (U+0027) |
+| Right single quote `’` | U+2019    | Straight apostrophe `'` (U+0027) |
+| Left double quote `“`  | U+201C    | Straight quote `"` (U+0022)  |
+| Right double quote `”` | U+201D    | Straight quote `"` (U+0022)  |
+| Em dash `—`            | U+2014    | Hyphen `-` (U+002D), or `--` |
 
 ## How to Work
 

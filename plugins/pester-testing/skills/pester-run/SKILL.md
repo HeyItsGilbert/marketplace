@@ -14,6 +14,9 @@ Run Pester 5 tests with agent-optimized output: failures and summary only.
 - Set `Output.Verbosity = 'Normal'` for all agent runs. This suppresses passing-test lines while showing full failure details and the final summary.
 - Run a focused subset first (by tag or path) when verifying a specific change. Run the full suite only to confirm a branch is clean.
 - Never re-run after a clean pass — report success and stop.
+- The in-process runs below are correct for agent use. The one exception is VS Code's
+  integrated PowerShell session, where Pester can hang the editor — there, run detached
+  via `Start-Process` (see `pester-patterns`, Pattern 0).
 
 ## Standard Invocation Patterns
 

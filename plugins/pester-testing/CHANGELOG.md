@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- `pester-patterns` and `pester-run` gave contradictory instructions for the same
+  action: `pester-run` prescribes an in-process `Invoke-Pester`, while Pattern 0
+  declared that approach CRITICAL to avoid and mandated `Start-Process` for all
+  runs. Pattern 0's warning is real but was stated unscoped, generalising a VS Code
+  integrated-session problem to every invocation. Scoped it to VS Code and
+  cross-linked the two skills, so agent runs use the in-process configuration and
+  keep the structured result object.
+
 ## [1.5.0] - 2026-05-18
 
 ### Added

@@ -19,10 +19,15 @@ Ready-to-use test patterns for common PowerShell testing scenarios using Pester 
 
 ## Pattern 0: Run Tests via Start-Process (Detached)
 
-> **CRITICAL**: Running Pester inside VS Code's integrated PowerShell session — **or even
-> via `pwsh -NoProfile -Command { ... }`** — can cause VS Code to hang or become completely
-> unresponsive. The terminal synchronously waits for the child process and Pester output
-> can stall the pipe. **Always use `Start-Process` (fully detached)**.
+**Scope: VS Code's integrated PowerShell session only.** Running Pester on the
+PowerShell extension's session thread can hang or freeze the editor — in-process
+`Invoke-Pester`, `InModuleScope` locking, and a stalled output pipe all block the
+language server. Inside VS Code, run detached via `Start-Process`.
+
+**For agent test runs, use [`pester-run`](../pester-run/SKILL.md) instead** — an
+in-process `New-PesterConfiguration` + `Invoke-Pester` run is correct and does not
+hang outside VS Code's integrated session. Do not reach for `Start-Process` just
+because a run is automated; it costs you the structured result object for nothing.
 
 ### Quick Start — Run All Tests
 
