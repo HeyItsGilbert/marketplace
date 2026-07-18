@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.5.2] - 2026-07-18
+
+### Fixed
+
+- `pre-commit-pester` PreToolUse hook failed on PowerShell with
+  `The term '${env:CLAUDE_PLUGIN_ROOT}/hooks/pre-commit-pester.ps1' is not
+  recognized...`. The hook command wrapped the path in single quotes, so
+  Claude Code's `${env:CLAUDE_PLUGIN_ROOT}` substitution (used for
+  `shell: "powershell"`) was never interpolated by PowerShell — single-quoted
+  strings don't expand variables. Switched to double quotes.
+
+## [1.5.1] - 2026-07-13
+
 ### Fixed
 
 - `pester-patterns` and `pester-run` gave contradictory instructions for the same
