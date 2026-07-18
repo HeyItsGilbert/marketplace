@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "pester-testing",
   "description": "Write, review, and run Pester 5 tests in PowerShell with LLM-optimized output. Includes ready-to-use patterns for mocking file systems, REST APIs, credentials, and DSC resources.",
-  "version": "1.5.0",
+  "version": "1.5.2",
   "hooks": {
     "PreToolUse": [
       {
@@ -12,7 +12,7 @@
             "type": "command",
             "shell": "powershell",
             "if": "Bash(git commit *)",
-            "command": "& '${CLAUDE_PLUGIN_ROOT}/hooks/pre-commit-pester.ps1'",
+            "command": "& \"${CLAUDE_PLUGIN_ROOT}/hooks/pre-commit-pester.ps1\"",
             "statusMessage": "Checking Pester tests before commit...",
             "timeout": 120
           }
