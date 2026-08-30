@@ -1,0 +1,12 @@
+{
+  "scope": "10 negative queries × 3 repetitions × 3 descriptions",
+  "method": "Each invocation loaded exactly one temporary release-skill plugin and recorded whether Claude invoked that plugin's Skill tool. Five invocations ran concurrently.",
+  "variants": {
+    "current": { "runs": 30, "incorrect_triggers": 0, "cost_usd": 1.694515 },
+    "pruned_exclusions": { "runs": 30, "incorrect_triggers": 0, "cost_usd": 1.971528 },
+    "pruned": { "runs": 30, "incorrect_triggers": 0, "cost_usd": 1.546642 }
+  },
+  "total_runs": 90,
+  "total_cost_usd": 5.212685,
+  "conclusion": "Across these adversarial negatives, synonym piling and explicit exclusions did not improve routing: all variants made zero incorrect skill invocations. This experiment intentionally does not measure positive-trigger recall, so it cannot independently answer whether synonym piling changes positive activation."
+}
