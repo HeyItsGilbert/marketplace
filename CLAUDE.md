@@ -52,7 +52,7 @@ To rerun evals: `bash create-test-repos.sh` to regenerate repos, clone into a ne
 
 ## Conventions
 
-- Skill descriptions in SKILL.md frontmatter should list trigger phrases so Claude Code knows when to activate the skill. Descriptions should be "pushy" — include explicit trigger contexts and near-miss exclusions to improve activation accuracy.
+- Skills and agent authoring follows [`docs/agents/skill-and-agent-authoring.md`](docs/agents/skill-and-agent-authoring.md).
 - Skill names use kebab-case (e.g., `death-by-ppt`).
 - Plugin names use kebab-case (e.g., `presentation-review`).
 - The `source` field in the marketplace manifest uses relative paths prefixed with `./`.
@@ -60,3 +60,13 @@ To rerun evals: `bash create-test-repos.sh` to regenerate repos, clone into a ne
 ## Hooks
 
 Prefer commands to be PowerShell scripts. They should have matching Pester tests to validate.
+
+## Agent skills
+
+### Issue tracker
+
+Issues are tracked in this repository’s GitHub Issues. See `docs/agents/issue-tracker.md`.
+
+### Domain docs
+
+This repository uses a single-context domain-document layout. See `docs/agents/domain.md`.
