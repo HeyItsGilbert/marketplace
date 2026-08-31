@@ -2,17 +2,15 @@
 name: pester-patterns
 description: Ready-to-use Pester 5 recipes for common PowerShell testing scenarios.
 disable-model-invocation: true
-allowed-tools:
-  - PowerShell(*)
 ---
 
 # Pester 5 Test Patterns and Recipes
 
-Use this user-invoked reference to find a focused Pester 5 recipe. For running tests, use `pester-run`; this skill does not define execution modes.
+Use this user-invoked reference to find a focused Pester 5 recipe. For running tests, use `pester-run`.
 
 ## Pattern index
 
-Detailed patterns live in `references/patterns.md`. Load only the relevant section.
+Detailed patterns live in `references/patterns.md`. Load the numbered section matching the index, or **Mock cheat sheet** when selecting a mock form.
 
 | Pattern | Use for |
 | --- | --- |
