@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-08-31
+
+### Changed
+
+- `death-by-ppt` is now user-invoked because specialized presentation review is
+  an explicit reference workflow. Use `/death-by-ppt` explicitly; no
+  compatibility alias is provided.
+
 ## [1.0.0] - 2026-03-29
 
 ### Added

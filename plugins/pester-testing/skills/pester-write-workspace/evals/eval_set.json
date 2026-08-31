@@ -1,0 +1,8 @@
+[
+  {"query":"Write Pester tests for this PowerShell function.","should_trigger":true,"notes":"Function test-authoring branch."},
+  {"query":"Add Pester coverage for this module.","should_trigger":true,"notes":"Module test-authoring branch."},
+  {"query":"Create Pester tests for this PowerShell script.","should_trigger":true,"notes":"Script test-authoring branch."},
+  {"query":"Add Pester coverage for this DSC resource.","should_trigger":true,"notes":"DSC test-authoring branch."},
+  {"query":"Create tests for this PowerShell class.","should_trigger":true,"notes":"Class test-authoring branch."},
+  {"query":"Review my existing Pester tests.","should_trigger":false,"notes":"Test review is distinct."}
+]

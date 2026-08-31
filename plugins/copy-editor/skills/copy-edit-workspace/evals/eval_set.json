@@ -1,0 +1,8 @@
+[
+  {"query":"Draft a technical newsletter from these notes.","should_trigger":true,"notes":"Drafting branch."},
+  {"query":"Polish this engineering announcement without losing my tone.","should_trigger":true,"notes":"Editorial polish branch."},
+  {"query":"Does this email sound like me?","should_trigger":true,"notes":"Tone-review branch."},
+  {"query":"Help me structure these rough notes into a blog post.","should_trigger":true,"notes":"Structure branch."},
+  {"query":"Review this blog post for search visibility.","should_trigger":true,"notes":"SEO review branch."},
+  {"query":"Run my PowerShell tests.","should_trigger":false,"notes":"Pester execution is distinct."}
+]

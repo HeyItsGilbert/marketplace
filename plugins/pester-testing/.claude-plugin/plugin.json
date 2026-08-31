@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "pester-testing",
   "description": "Write, review, and run Pester 5 tests in PowerShell with LLM-optimized output. Includes ready-to-use patterns for mocking file systems, REST APIs, credentials, and DSC resources.",
-  "version": "1.5.2",
+  "version": "2.0.0",
   "hooks": {
     "PreToolUse": [
       {
@@ -36,22 +36,14 @@
   "commands": {
     "pester": {
       "description": "Run Pester 5 tests with agent-optimized output (failures and summary only). Accepts an optional path and tag filter arguments.",
-      "argumentHint": "[path] [-Tag <name>] [-ExcludeTag <name>]",
+      "argumentHint": "[path-or-directory] [-Tag <name>] [-ExcludeTag <name>] [-Name <pattern>]",
       "allowedTools": [
         "PowerShell(*)"
       ],
-      "content": "Run Pester 5 tests using the pester-run workflow.\n\n## Parsing Arguments\n\nParse `$ARGUMENTS` if provided:\n- A `.Tests.ps1` path → set `$cfg.Run.Path`\n- `-Tag <name>` → set `$cfg.Filter.Tag = @('<name>')`\n- `-ExcludeTag <name>` → set `$cfg.Filter.ExcludeTag = @('<name>')`\n- No arguments → run all `*.Tests.ps1` files discovered from the current directory\n\n## Execution\n\nBuild a `New-PesterConfiguration` with `Output.Verbosity = 'Normal'` and `Run.PassThru = $true`. Apply any filters. Run with `Invoke-Pester -Configuration $cfg`.\n\n## Reporting\n\n- All pass: `All N tests passed (X.Xs)`\n- Failures: one line per failure showing the full test path and assertion error, then the summary line (`Passed: N | Failed: N | Skipped: N`)"
+      "content": "Run Pester 5 tests using the pester-run workflow. Parse `$ARGUMENTS` as an optional test-file path or directory plus optional `-Tag`, `-ExcludeTag`, and `-Name` filters. Map the supplied values to the selected path, tag, exclusion-tag, and full-name settings before execution. Follow pester-run's execution-mode selection exactly: use its detached mode only in VS Code's integrated PowerShell session, otherwise use its in-process structured-result mode. When no target is supplied, discover test files as pester-run directs. Report the final result using the pester-run reporting contract."
     }
   },
   "userConfig": {
-    "coverageThreshold": {
-      "type": "number",
-      "title": "Code Coverage Threshold (%)",
-      "description": "Minimum acceptable code coverage percentage. When greater than 0, Pester enables coverage tracking and warns if results fall below this value. Set to 0 to disable.",
-      "default": 80,
-      "min": 0,
-      "max": 100
-    },
     "psesPath": {
       "type": "directory",
       "title": "PowerShell Editor Services Bundle Path",

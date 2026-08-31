@@ -83,11 +83,5 @@ Run a seven-perspective code review of the current branch's changes. Each review
 ---
 
 ## Verdict
-[1-2 sentence overall assessment highlighting the most critical findings across all reviewers. If any reviewer recommends a pr-review-toolkit agent for deeper analysis, mention it here.]
+[1-2 sentence overall assessment highlighting the most critical findings across all reviewers.]
 ```
-
-## Notes
-
-- If the diff is very large (100+ files), focus agents on the most impactful changes and note which files were excluded.
-- Let each reviewer speak fully in character — the personality is intentional.
-- If any reviewer recommends a `pr-review-toolkit` agent for deeper analysis, surface that in the verdict.

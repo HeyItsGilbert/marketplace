@@ -1,0 +1,6 @@
+[
+  {"query":"Prepare a release and update the changelog.","should_trigger":true,"notes":"Release preparation branch."},
+  {"query":"Bump this package version for a hotfix.","should_trigger":true,"notes":"Version classification branch."},
+  {"query":"Cut the first stable 1.0.0 release.","should_trigger":true,"notes":"First-stable-release branch."},
+  {"query":"Configure GitHub Actions for deployment.","should_trigger":false,"notes":"CI configuration is not release preparation."}
+]
