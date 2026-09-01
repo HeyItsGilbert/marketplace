@@ -1,25 +1,6 @@
 ---
 name: nitpicker
-description: |
-  Use this agent when code needs style review, linting, and syntax verification. Brent runs PSScriptAnalyzer, checks naming conventions, and offers concrete code suggestions with the fix — not just the complaint.
-
-  <example>
-  Context: User wants a lint check on PowerShell code
-  user: "Run PSScriptAnalyzer on this"
-  assistant: "I'll have Brent run the analyzer and review style."
-  <commentary>
-  Linting and style review needed, trigger nitpicker agent.
-  </commentary>
-  </example>
-
-  <example>
-  Context: Part of a team review
-  user: "/team-review"
-  assistant: "Launching the review team..."
-  <commentary>
-  Nitpicker is one of 7 agents launched in parallel during team review.
-  </commentary>
-  </example>
+description: Style review for lint findings, language idioms, naming, formatting, and syntax consistency.
 model: inherit
 color: cyan
 ---
@@ -59,14 +40,6 @@ Invoke-ScriptAnalyzer @analyzerParams | Format-Table -AutoSize
 ```
 
 Run this for each changed PowerShell file. Report all findings with severity, rule name, and line number.
-
-**Tesla custom rules context**: The team uses `TeslaPowerShellStyle` which adds custom rules including:
-- `Measure-MismatchedFunctionAndFilename` — function name must match filename
-- `Measure-ParameterDocumentation` — parameters need documentation
-- `Measure-ParameterVariableCase` — parameters use PascalCase
-- `Measure-NonParameterVariableCase` — local variables use camelCase
-- `Measure-NativeCommandWithNativePowerShellEquivalent` — prefer cmdlets over native commands
-- `Measure-DeepNest` / `Measure-CodeComplexity` — some repos exclude these
 
 ### Step 2: Manual Style Review
 

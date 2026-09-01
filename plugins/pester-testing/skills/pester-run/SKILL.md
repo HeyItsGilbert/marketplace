@@ -1,183 +1,104 @@
 ---
 name: pester-run
-description: Run Pester 5 tests with agent-optimized output — failures and summary only, no passing-test noise. Use when asked to run tests, execute the test suite, run a specific file, filter by tag, verify a change, or find what's failing. Triggers: "run the tests", "run Pester", "execute the test suite", "check if tests pass", "what tests are failing", "are all tests green", "does this break any tests". Not for writing tests (use pester-write) or reviewing quality (use pester-review).
+description: Run Pester 5 tests for a suite, path, tag, exclusion, name filter, or failing-change verification.
 allowed-tools: PowerShell(*), Bash(find *)
 ---
 
 # Pester 5 Test Runner
 
-Run Pester 5 tests with agent-optimized output: failures and summary only.
+Run Pester with a structured result object and report failures concisely.
 
-## Efficiency Guidelines
+## Choose the execution mode
 
-- Always use `New-PesterConfiguration` with `Run.PassThru = $true` — this gives you a structured result object so you can check `$result.FailedCount` rather than parsing text output.
-- Set `Output.Verbosity = 'Normal'` for all agent runs. This suppresses passing-test lines while showing full failure details and the final summary.
-- Run a focused subset first (by tag or path) when verifying a specific change. Run the full suite only to confirm a branch is clean.
-- Never re-run after a clean pass — report success and stop.
-- The in-process runs below are correct for agent use. The one exception is VS Code's
-  integrated PowerShell session, where Pester can hang the editor — there, run detached
-  via `Start-Process` (see `pester-patterns`, Pattern 0).
+1. **Identify the host.** If running from an agent or a normal PowerShell process, use the in-process mode. If running inside VS Code's integrated PowerShell session, use detached mode to avoid blocking the PowerShell extension. Complete when exactly one mode is selected.
+2. **Choose the narrowest requested target.** Use a file, directory, tag, or name filter when supplied; discover `*.Tests.ps1` files only when no target is known. Complete when the configuration matches the requested test scope.
 
-## Standard Invocation Patterns
-
-### Whole suite
+### In-process mode
 
 ```powershell
 $cfg = New-PesterConfiguration
 $cfg.Output.Verbosity = 'Normal'
-$cfg.Run.PassThru     = $true
+$cfg.Run.PassThru = $true
+
+# Set only the filters the request supplies.
+# $cfg.Run.Path = './tests/Get-Widget.Tests.ps1'
+# $cfg.Filter.Tag = @('Unit')
+# $cfg.Filter.ExcludeTag = @('Slow')
+# $cfg.Filter.FullName = '*Get-Widget*returns*'
 $result = Invoke-Pester -Configuration $cfg
 ```
 
-### Specific file or directory
+Use `$result.FailedCount`, `$result.PassedCount`, `$result.SkippedCount`, and `$result.Failed` rather than parsing output. For tags, set `$cfg.Filter.Tag` and `$cfg.Filter.ExcludeTag` only when the request supplies them.
+
+### VS Code detached mode
 
 ```powershell
-$cfg = New-PesterConfiguration
-$cfg.Run.Path         = './tests/Get-Widget.Tests.ps1'
-$cfg.Output.Verbosity = 'Normal'
-$cfg.Run.PassThru     = $true
-$result = Invoke-Pester -Configuration $cfg
-```
+# Populate these from the selected request. Leave arrays empty when not supplied.
+$selectedPath = @()       # Requested file or directory; otherwise discovered test files.
+$selectedTags = @()       # Requested -Tag values.
+$excludedTags = @()       # Requested -ExcludeTag values.
+$selectedName = $null     # Requested test-name pattern.
 
-### Filter by tag
-
-```powershell
-$cfg = New-PesterConfiguration
-$cfg.Filter.Tag        = @('Unit')
-$cfg.Filter.ExcludeTag = @('Slow', 'Integration')
-$cfg.Output.Verbosity  = 'Normal'
-$cfg.Run.PassThru      = $true
-$result = Invoke-Pester -Configuration $cfg
-```
-
-### Filter by test name pattern
-
-```powershell
-$cfg = New-PesterConfiguration
-$cfg.Filter.FullName  = '*Get-Widget*returns*'
-$cfg.Output.Verbosity = 'Normal'
-$cfg.Run.PassThru     = $true
-$result = Invoke-Pester -Configuration $cfg
-```
-
-## Reading the Result Object
-
-Check `$result.FailedCount` — do not parse text output.
-
-| Property | Type | Description |
-|---|---|---|
-| `$result.FailedCount` | `int` | Number of failed tests |
-| `$result.PassedCount` | `int` | Number of passed tests |
-| `$result.SkippedCount` | `int` | Number of skipped tests |
-| `$result.TotalCount` | `int` | Total tests executed |
-| `$result.Duration` | `TimeSpan` | Total wall-clock time |
-| `$result.Failed` | `TestResult[]` | Array of failed test objects |
-| `$result.Failed[n].ExpandedPath` | `string` | Full test path: `Describe > Context > It` |
-| `$result.Failed[n].ErrorRecord.Exception.Message` | `string` | Human-readable failure reason |
-
-## Reporting Format
-
-Report results concisely. Do not reproduce passing-test output.
-
-**All passing:**
-```
-All 47 tests passed (3.2s)
-```
-
-**With failures:**
-```
-3 of 47 tests failed (4.1s)
-
-✗ Get-Widget > when Id is negative > throws ArgumentException
-  Expected exception [System.ArgumentException] but got [System.Exception]: Value was invalid.
-
-✗ Invoke-Sync > when the API is unreachable > calls Write-Error once
-  Expected Write-Error to be called 1 time(s) but was called 0 time(s).
-
-✗ Export-Report > creates the output file
-  Expected 'TestDrive:\report.csv' to exist, but it did not.
-
-Passed: 44 | Failed: 3 | Skipped: 0 (4.1s)
-```
-
-## Discovering Test Files
-
-When no path is specified and the project layout is unknown, find all test files first:
-
-```powershell
-# PowerShell
-Get-ChildItem -Recurse -Filter '*.Tests.ps1' | Select-Object -ExpandProperty FullName
-```
-
-```bash
-# Bash
-find . -name '*.Tests.ps1' -not -path '*/node_modules/*'
-```
-
-Run from the project root so `$PSCommandPath`-relative imports and module paths resolve correctly.
-
-## Verbosity Reference
-
-| Level | Output | Use when |
-|---|---|---|
-| `None` | Silent | CI pipelines consuming XML test results only |
-| `Normal` | Failures + final summary | Agent runs — default for this skill |
-| `Detailed` | All test names with pass/fail status | Interactive debugging |
-| `Diagnostic` | Internal Pester state + debug messages | Diagnosing Pester itself |
-
-## Code Coverage
-
-When `${user_config.coverageThreshold}` is greater than 0, enable coverage tracking alongside the standard run:
-
-```powershell
-$cfg = New-PesterConfiguration
-$cfg.Output.Verbosity                   = 'Normal'
-$cfg.Run.PassThru                       = $true
-$cfg.CodeCoverage.Enabled               = $true
-$cfg.CodeCoverage.CoveragePercentTarget = ${user_config.coverageThreshold}
-$cfg.CodeCoverage.Path                  = @('./src/*.ps1', './src/*.psm1')  # adjust to project
-$result = Invoke-Pester -Configuration $cfg
-```
-
-Coverage results live in `$result.CodeCoverage`:
-
-| Property | Description |
-|---|---|
-| `$result.CodeCoverage.CoveragePercent` | Actual coverage percentage achieved |
-| `$result.CodeCoverage.CommandsMissedCount` | Uncovered commands |
-| `$result.CodeCoverage.CommandsExecutedCount` | Covered commands |
-
-Report coverage inline with test results:
-
-```
-Coverage: 73.2% (target: ${user_config.coverageThreshold}%) ⚠ Below threshold
-Missed: 12 commands — Get-Widget.ps1:42, Invoke-Sync.ps1:88, Export-Report.ps1:31
-```
-
-Skip coverage for focused runs (tag-filtered, single-file, quick feedback) — it adds overhead and means less on a subset. Enable it for full-suite runs where you want a coverage gate.
-
-## Common Failure Patterns
-
-When `$result.FailedCount -gt 0`, match the error message before reporting to help the user understand root cause:
-
-| Error message contains | Likely cause |
-|---|---|
-| `Cannot find module` | Module not imported in `BeforeAll`; check path |
-| `The term '...' is not recognized` | Missing mock, wrong scope, or function not loaded |
-| `Expected ... to be called` | Mock defined in wrong scope (move to `Describe`-level `BeforeAll`) |
-| `Expected '...' to exist` | `TestDrive:` path typo or file creation step missing |
-| `Cannot bind parameter` | Source function signature changed; parameter name mismatch |
-| `is $null` | `BeforeAll` variable used in `It` without `$script:` scope |
-
-## Pester 5 Installation Check
-
-If Pester is missing or below v5, install before running:
-
-```powershell
-$pester = Get-Module Pester -ListAvailable | Sort-Object Version -Descending | Select-Object -First 1
-if (-not $pester -or $pester.Version -lt [version]'5.0') {
-    Install-Module Pester -MinimumVersion 5.0.0 -Scope CurrentUser -Force
+if (-not $selectedPath) {
+  $selectedPath = Get-ChildItem -Recurse -Filter '*.Tests.ps1' | Select-Object -ExpandProperty FullName
 }
+
+$workspace = Join-Path ([IO.Path]::GetTempPath()) "pester-run-$([guid]::NewGuid())"
+New-Item -Path $workspace -ItemType Directory -Force | Out-Null
+$payloadPath = Join-Path $workspace 'request.json'
+$resultPath = Join-Path $workspace 'result.clixml'
+$childScriptPath = Join-Path $workspace 'run-pester.ps1'
+
+[pscustomobject]@{
+  WorkingDirectory = $PWD.Path
+  Paths = @($selectedPath)
+  Tags = @($selectedTags)
+  ExcludedTags = @($excludedTags)
+  FullName = $selectedName
+  ResultPath = $resultPath
+} | ConvertTo-Json -Depth 3 | Set-Content -LiteralPath $payloadPath -Encoding utf8
+
+@'
+param([string] $PayloadPath)
+
+$payload = Get-Content -Raw -LiteralPath $PayloadPath | ConvertFrom-Json
+$envelope = [ordered]@{ Result = $null; Error = $null }
+try {
+  Set-Location -LiteralPath $payload.WorkingDirectory
+  $cfg = New-PesterConfiguration
+  $cfg.Output.Verbosity = 'Normal'
+  $cfg.Run.PassThru = $true
+  $cfg.Run.Path = @($payload.Paths)
+  if ($null -ne $payload.Tags -and @($payload.Tags).Count -gt 0) { $cfg.Filter.Tag = @($payload.Tags) }
+  if ($null -ne $payload.ExcludedTags -and @($payload.ExcludedTags).Count -gt 0) { $cfg.Filter.ExcludeTag = @($payload.ExcludedTags) }
+  if ($payload.FullName) { $cfg.Filter.FullName = $payload.FullName }
+  $envelope.Result = Invoke-Pester -Configuration $cfg
+}
+catch {
+  $envelope.Error = [pscustomobject]@{
+    Message = $_.Exception.Message
+    FullyQualifiedErrorId = $_.FullyQualifiedErrorId
+    ScriptStackTrace = $_.ScriptStackTrace
+  }
+}
+[pscustomobject] $envelope | Export-Clixml -LiteralPath $payload.ResultPath
+if ($envelope.Error -or $envelope.Result.FailedCount -gt 0) { exit 1 }
+'@ | Set-Content -LiteralPath $childScriptPath -Encoding utf8
+
+$process = Start-Process pwsh -ArgumentList @(
+  '-NoProfile', '-NonInteractive', '-File', "`"$childScriptPath`"", "`"$payloadPath`""
+) -PassThru
+$process | Wait-Process
+$run = Import-Clixml -LiteralPath $resultPath
+Remove-Item -LiteralPath $workspace -Recurse -Force
 ```
 
-`-Scope CurrentUser` avoids needing admin rights. On systems with both PS 5.1 and PS 7+, install into both if needed.
+Use `$run.Result.FailedCount`, `$run.Result.PassedCount`, `$run.Result.SkippedCount`, and `$run.Result.Failed` for the report. If `$run.Error` is present, report its message, error ID, and stack trace. This mode preserves the same selected path, tag, exclusion-tag, and name scope as the in-process mode.
+
+## Report
+
+1. Report the total result and duration. For passing runs, state the passing count only.
+2. For failures, report each failed test's full path and error message, then the passed, failed, and skipped totals.
+3. If Pester 5 is unavailable, state that prerequisite and provide the installation command; do not claim a run occurred.
+
+Treat a clean completed result as final.

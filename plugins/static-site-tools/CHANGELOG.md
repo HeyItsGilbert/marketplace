@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-08-31
+
+### Changed
+
+- `og-image-design` is now user-invoked because image-design guidance is an
+  explicit reference workflow. Use `/og-image-design` explicitly; no
+  compatibility alias is provided.
+
 ## [1.0.0] - 2026-04-24
 
 ### Added

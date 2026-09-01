@@ -1,6 +1,0 @@
-{
-  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
-  "name": "architecture-decisions",
-  "description": "Create and manage Architecture Decision Records (ADRs) and RFCs committed to the repo",
-  "version": "0.1.1"
-}

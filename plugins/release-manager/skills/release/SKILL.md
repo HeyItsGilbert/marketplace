@@ -1,149 +1,29 @@
 ---
 name: release
-description: Prepare a release — update CHANGELOG.md and bump the version in manifests (package.json, *.psd1, pyproject.toml, Cargo.toml, *.csproj). Follows Keep a Changelog and SemVer. Use when the user wants to cut, ship, or prep a release, bump a version, do a first stable release (0.x→1.0), prep a hotfix, or normalize a non-semver version. Triggers: "prepare the release", "version bump", "update changelog", "cut a release", "ship a new version", "go 1.0". Does the file edits and commit — not CI/CD config, tooling, rollbacks, or git tagging.
+description: Release a project by classifying changes, updating its changelog and version manifests, and committing the release.
 allowed-tools: Bash(git log *), Bash(git diff *), Bash(git add *), Bash(git commit *), Bash(git status *), Bash(git checkout *), Bash(git branch *), Bash(gh pr *)
 ---
 
-# Release Manager Skill
+# Release Manager
 
-Automatically update the CHANGELOG.md and project version for a new
-release, following Keep a Changelog and Semantic Versioning.
-
-## Efficiency Guidelines
-
-- Read CHANGELOG.md and the version manifest in parallel. Read at
-  least 100 lines of the changelog (older entries help you match the
-  existing style) and at least 50 lines of the manifest.
-- Use a single git log command to get all commit details since the
-  last release — multiple commands waste time and can miss context:
-  `git log <baseline>..HEAD --format="%h %s%n%b"`
-  where `<baseline>` is the commit hash of the last released version
-  from the changelog.
-- Update both the version manifest and CHANGELOG.md before committing
-  so they stay in sync.
-- Validate changes by checking exit codes, not full output — reading
-  large outputs burns context for no benefit.
+Prepare a versioned release using Keep a Changelog and Semantic Versioning.
 
 ## Workflow
 
-### 1. Gather Context (in parallel)
+1. **Identify release inputs.** Read the existing changelog, all relevant version manifests, and commits since the last released version. Complete when the release baseline and affected package manifests are known.
+2. **Classify the change.** Use SemVer: major for incompatible published-interface changes, minor for backward-compatible features, and patch for backward-compatible fixes. Apply **Version rules**. When evidence is ambiguous, state the evidence and ask for the release decision. Complete when a single version is selected.
+3. **Update release records.** Move release entries from `## [Unreleased]` into a new `## [version] - YYYY-MM-DD` section, retain `Unreleased` for future changes, and apply **Changelog rules**. Complete when every released manifest version and changelog entry agree.
+4. **Validate the release material.** Read the final changelog section and manifests, then run repository-documented validation relevant to changed release files; when no validation is documented, record that fact. Complete when the observed output supports the release contents.
+5. **Commit and publish the release change.** Stage only the release files, commit with the release version, then create or update the release PR if requested. Complete when the commit and requested PR state are reported.
 
-Read these in parallel to minimize round-trips:
+## Version rules
 
-- **CHANGELOG.md** (first 100 lines). If it doesn't exist, you'll
-  create one in step 3.
-- **Version manifest** — detect the project type and read the
-  appropriate file:
+From the established released version, increment exactly one selected SemVer component and reset lower components. Use prerelease or build identifiers only when established project conventions or an explicit user request require them.
 
-  | Project Type | Manifest File     | Version Field          |
-  |-------------|-------------------|------------------------|
-  | Node.js     | `package.json`    | `"version": "X.Y.Z"`  |
-  | PowerShell  | `*.psd1`          | `ModuleVersion = 'X.Y.Z'` |
-  | Python      | `pyproject.toml`  | `version = "X.Y.Z"`   |
-  | Rust        | `Cargo.toml`      | `version = "X.Y.Z"`   |
-  | .NET        | `*.csproj`        | `<Version>X.Y.Z</Version>` |
+## Manifest recognition
 
-  If multiple manifests exist, ask which one to update. If none exist,
-  skip the version manifest update and note this to the user.
+Recognise `package.json`, PowerShell module manifests, `pyproject.toml`, `Cargo.toml`, and `.csproj` version fields. If several release units are present, establish which package is being released before changing any version.
 
-- **Git log** — get all commits since the last release:
-  `git log <baseline>..HEAD --format="%h %s%n%b"`
-  `<baseline>` = the commit hash from the last version entry in the
-  changelog. For a first release, use the repo's initial commit.
+## Changelog rules
 
-### 2. Determine Version Bump
-
-Always use strict Semantic Versioning (MAJOR.MINOR.PATCH). If the
-project uses a non-standard scheme (e.g., `1.2.3.0` or `1.2.3-beta`),
-normalize to three-part semver — `1.2.3.0` becomes `1.2.3`, and the
-next bump follows from there.
-
-| Bump  | When                                      |
-|-------|-------------------------------------------|
-| MAJOR | Breaking changes                          |
-| MINOR | New features, backward-compatible         |
-| PATCH | Bug fixes, backward-compatible            |
-
-**First stable release (0.x → 1.0.0):** If the current version is
-below 1.0.0 (e.g., 0.0.1, 0.1.0) and the user says "first release",
-"first real release", "ready for production", or similar language
-signaling stability, bump to **1.0.0**. Pre-1.0 versions are
-development placeholders — a "first real release" means the project
-is ready for consumers, which is what 1.0.0 represents in semver.
-
-Determine the bump level using this approach, in order:
-
-1. **Commit messages first.** Scan for conventional commit prefixes
-   (`feat:`, `fix:`, `BREAKING CHANGE:`) — these are the fastest
-   signal.
-2. **Read the diffs.** When commit messages are vague or don't follow
-   conventions, read the actual code changes with
-   `git diff <baseline>..HEAD` to understand what changed. New public
-   APIs or exported functions → MINOR. Bug fixes and internal
-   refactors → PATCH. Removed or renamed public APIs, changed
-   function signatures, breaking config changes → MAJOR.
-3. **Ask only as a last resort.** If the changes are genuinely
-   ambiguous after reading the code (e.g., a large refactor that
-   might or might not break consumers), ask the user — but present
-   your best guess with reasoning so they can confirm quickly.
-
-- If re-running for an unreleased version, keep the existing version
-  unless a higher bump is now needed.
-
-### 3. Update Files
-
-**CHANGELOG.md:**
-
-- Add a new `## [X.Y.Z] - YYYY-MM-DD` section (note the dash
-  between version and date) below `## [Unreleased]`. If no
-  Unreleased section exists, add one above the new version entry.
-- If this is the first release and no CHANGELOG.md exists, create one
-  with the Keep a Changelog header format, including an
-  `## [Unreleased]` section.
-- Categorize changes using Keep a Changelog categories. The allowed
-  `###` headings depend on the release type:
-
-  | Release type            | Allowed `###` sections                                      |
-  |-------------------------|-------------------------------------------------------------|
-  | Patch (x.y.N, N > 0)   | `Fixed`, `Security` only                                    |
-  | Minor (x.y.0, y > 0)   | `Added`, `Changed`, `Deprecated`, `Fixed`, `Security`       |
-  | Major (x.0.0)           | All of the above + `Removed`                                |
-  | `[Unreleased]`          | All sections                                                |
-
-  Non-standard headings (`Docs`, `Chore`, `Misc`, `Internal`, etc.)
-  are **never** allowed.
-
-  **Patch release rule:** If the commit history contains `feat:` /
-  `Added` items and you are writing a patch entry, emit a warning that
-  those changes normally warrant a MINOR bump, then collapse them under
-  `### Fixed` (or prompt the user to bump to a minor version instead).
-
-- After drafting the CHANGELOG entry, scan every `###` heading in the
-  new section and confirm it is on the allowed list for this release
-  type. If any heading is non-compliant, fix it before committing.
-- Only include categories that have entries.
-- Keep lines to 80 characters or fewer.
-- Preserve any manual edits if re-running.
-- Add a comparison link at the bottom if the repo already uses them.
-  For a first release, comparison links are optional.
-
-**Version manifest:**
-
-- Update the version field in the detected manifest file to match the
-  new version. Use the format appropriate for the project type (see
-  table in step 1).
-
-### 4. Commit and Create PR
-
-- Stage changed files and commit:
-  `git add <files> && git commit -m "chore(release): X.Y.Z"`
-- If not already on a release branch, create one: `release/X.Y.Z`
-- Create or update a PR:
-  `gh pr create --title "chore(release): X.Y.Z" --body "<changelog section for this version>"`
-  If a PR already exists for this branch, update it instead:
-  `gh pr edit <number> --body "<updated changelog section>"`
-
-## Standards
-
-- [Keep a Changelog](https://keepachangelog.com/)
-- [Semantic Versioning](https://semver.org/)
+Keep a Changelog entries use Added, Changed, Deprecated, Removed, Fixed, and Security as applicable. A major release may include Removed; a patch release uses Fixed and Security only. Preserve manual edits and existing comparison-link conventions.

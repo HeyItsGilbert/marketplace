@@ -7,17 +7,15 @@ custom skills.
 
 | Plugin                    | Skill / Command   | Description                                                                                   |
 |---------------------------|-------------------|-----------------------------------------------------------------------------------------------|
-| `architecture-decisions`  | `/adr`            | Create and manage Architecture Decision Records committed to the repo                         |
-| `architecture-decisions`  | `/rfc`            | Draft and manage Requests for Comments for decisions that need team discussion                 |
 | `code-review-team`        | `/team-review`    | Seven-perspective parallel code review (Staff SWE, Architect, Nitpicker, Junior, Grey Hat, Docs, Test Strategist) |
 | `copy-editor`             | `/copy-edit`      | Write, brainstorm, polish, and review content while preserving Gilbert's voice                |
 | `pester-testing`          | `/pester-write`   | Write Pester 5 test files for PowerShell functions, modules, and scripts                      |
 | `pester-testing`          | `/pester-review`  | Review existing Pester tests for correctness, idiomatic usage, and coverage gaps              |
 | `pester-testing`          | `/pester-run`     | Run Pester 5 tests with agent-optimized output (failures and summary only)                    |
-| `pester-testing`          | `/pester-patterns`| Ready-to-use Pester 5 recipes — mocks for filesystem, REST, credentials, DSC, and more        |
-| `presentation-review`     | `/death-by-ppt`   | Review MARP presentations for "Death by PowerPoint" issues                                    |
+| `pester-testing`          | `/pester-patterns`| User-invoked Pester 5 recipe and mock reference                                               |
+| `presentation-review`     | `/death-by-ppt`   | User-invoked MARP presentation review                                                          |
 | `release-manager`         | `/release`        | Update CHANGELOG.md and bump project versions following Keep a Changelog and SemVer           |
-| `static-site-tools`       | `/og-image-design`| Design Open Graph and social sharing images with platform specs and HTML templates            |
+| `static-site-tools`       | `/og-image-design`| User-invoked Open Graph and social sharing image guidance                                      |
 
 ## Installation
 
@@ -28,10 +26,18 @@ Add this marketplace inside Claude Code, then install the plugins you want:
 /plugin install pester-testing@my-plugins
 ```
 
-Browse and toggle plugins interactively with `/plugin`. Once installed, skills
-are available in any Claude Code session — type the skill name (e.g.
-`/release`) or describe what you want and Claude will activate the matching
-skill automatically.
+Browse and toggle plugins interactively with `/plugin`. Model-invoked skills
+activate for matching requests. User-invoked reference skills
+(`/pester-patterns`, `/death-by-ppt`, and `/og-image-design`) must be invoked
+explicitly.
+
+## Retired plugin
+
+`architecture-decisions` is no longer available from this marketplace. For ADR
+workflow guidance, add `mattpocock/skills` and use `domain-modeling` or
+`grill-with-docs`; this is not a one-for-one `/adr` replacement. RFC authoring
+is discontinued. Installed copies are cached and receive no automatic notice;
+see [the retirement record](docs/architecture-decisions-retirement.md).
 
 ## Repository Structure
 

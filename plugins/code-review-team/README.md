@@ -35,14 +35,7 @@ Agent(subagent_type="code-review-team:test-strategist", prompt="Review test stra
 
 ## PSScriptAnalyzer Integration
 
-Brent (the nitpicker) automatically runs `Invoke-ScriptAnalyzer` on changed PowerShell files. It looks for `PSScriptAnalyzerSettings.psd1` in the repo root and falls back to the default ruleset. Tesla custom rules from `TeslaPowerShellStyle` are supported when the module is installed.
-
-## Relationship to pr-review-toolkit
-
-This plugin is independent from `pr-review-toolkit`. The reviewers may recommend pr-review-toolkit agents when deeper analysis would help:
-
-- `pr-review-toolkit:type-design-analyzer` — when Sage spots type design concerns
-- `pr-review-toolkit:silent-failure-hunter` — when DualCore spots error handling that could mask security issues
+Brent (the nitpicker) automatically runs `Invoke-ScriptAnalyzer` on changed PowerShell files. It looks for `PSScriptAnalyzerSettings.psd1` in the repo root and falls back to the default ruleset.
 
 ## Relationship to pester-testing
 
