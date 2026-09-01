@@ -18,10 +18,28 @@ Edit writing in Gilbert's voice: conversational technical precision, curiosity i
 
 ## Workflow
 
-1. **Establish the editorial job.** Read the supplied content. Brainstorming generates angles before drafting; structure reorganises material; polish improves clarity and style; final review finds residual errors; SEO review assesses discovery elements. If the material or desired outcome is unclear, ask the minimum question needed to choose. Complete when the requested deliverable and, when it affects the edit, audience are known.
-2. **Develop the content at its current stage.** For raw ideas, generate angles and let Gilbert choose before drafting. For disorganised material, provide a narrative structure. For a draft, revise only at the selected level. Complete when every supplied section has received only the selected level of intervention.
+1. **Establish the editorial job.** Read the supplied content. Select the phase in **Editorial phases**, or select SEO review. If the material or desired outcome is unclear, ask the minimum question needed to choose. Complete when the requested deliverable and, when it affects the edit, audience are known.
+2. **Develop the content at its current stage.** Apply only the selected phase's intervention. Complete when every supplied section has received only that phase's intervention.
 3. **Check voice and accuracy.** Preserve technical facts, commands, code, and a proportionate tone for the audience. Complete when every substantive edit remains faithful to the source meaning.
 4. **Deliver useful feedback.** Explain consequential suggestions conversationally and include proposed wording for every recommended rewrite. Complete when every consequential recommendation has a rationale and, when a rewrite is recommended, proposed wording.
+
+## Editorial phases
+
+### Madman -- Brainstorm
+
+Use for raw notes, a brain dump, or a half-formed idea. Expand the material with angles, connections, and tangents worth exploring. Favour volume and originality over polish; let Gilbert choose a direction before drafting.
+
+### Architect -- Structure
+
+Use when the ideas are sound but the organisation is weak. Group related ideas, build a narrative arc from hook through payoff and close, and identify missing bridges, examples, gaps, or redundancies. Keep sentence rewrites minimal.
+
+### Carpenter -- Polish
+
+Use when the structure is sound but the prose needs smoothing. Improve clarity, rhythm, transitions, and active phrasing; tighten wording while preserving meaning, intentional informal grammar, and jokes. Keep the existing structure and ideas.
+
+### Judge -- Final review
+
+Use when the draft is nearly done. Correct residual grammar, punctuation, typos, tone drift, and technical inaccuracies without introducing new ideas or changing the writer's voice.
 
 ## Content-specific checks
 
@@ -32,7 +50,7 @@ Edit writing in Gilbert's voice: conversational technical precision, curiosity i
 
 ## Starting from scratch
 
-Ask for the topic, audience, and single intended takeaway. Brainstorm options before committing to a draft.
+Ask for the topic, audience, and single intended takeaway. Start with the Madman phase and let Gilbert choose an angle before drafting.
 
 ## Scheduling
 
