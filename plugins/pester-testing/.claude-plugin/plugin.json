@@ -40,7 +40,7 @@
       "allowedTools": [
         "PowerShell(*)"
       ],
-      "content": "Run Pester 5 tests using the pester-run workflow. Parse `$ARGUMENTS` as an optional test-file path or directory plus optional `-Tag`, `-ExcludeTag`, and `-Name` filters. Map the supplied values to the selected path, tag, exclusion-tag, and full-name settings before execution. Follow pester-run's execution-mode selection exactly: use its detached mode only in VS Code's integrated PowerShell session, otherwise use its in-process structured-result mode. When no target is supplied, discover test files as pester-run directs. Report the final result using the pester-run reporting contract."
+      "content": "Run Pester 5 tests using the pester-run workflow. Parse `$ARGUMENTS` as an optional test-file path or directory plus optional `-Tag`, `-ExcludeTag`, and `-Name` filters. Map the supplied values to the selected path, tag, exclusion-tag, and full-name settings before execution. When no target is supplied, discover test files as pester-run directs. Report the final result using the pester-run reporting contract."
     }
   },
   "userConfig": {
