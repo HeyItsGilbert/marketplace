@@ -1,5 +1,5 @@
 [
-  {"query":"Draft a technical newsletter from these notes.","should_trigger":true,"notes":"Drafting branch."},
+  {"query":"Help me explore possible angles for a technical newsletter from these notes.","should_trigger":true,"notes":"Brainstorming branch."},
   {"query":"Polish this engineering announcement without losing my tone.","should_trigger":true,"notes":"Editorial polish branch."},
   {"query":"Does this email sound like me?","should_trigger":true,"notes":"Tone-review branch."},
   {"query":"Help me structure these rough notes into a blog post.","should_trigger":true,"notes":"Structure branch."},
