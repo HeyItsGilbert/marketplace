@@ -18,4 +18,4 @@ Write behavior-focused, isolated Pester 5 tests.
 
 ## Conditional reference
 
-Before implementing a test involving filesystem, REST, credentials, DSC, classes, pipelines, errors or output, dates, `ShouldProcess`, environment variables, exports, private members, external fixtures, or unavailable external modules, load the matching numbered section in `pester-patterns/references/patterns.md`. When selecting a mock form, load its **Mock cheat sheet**. That file is the sole recipe authority.
+Before implementing a test involving filesystem, REST, credentials, DSC, classes, pipelines, errors or output, dates, `ShouldProcess`, environment variables, exports, private members, external fixtures, or unavailable external modules, load the matching numbered section in `../pester-patterns/references/patterns.md`. When selecting a mock form, load its **Mock cheat sheet**. That file is the sole recipe authority.
