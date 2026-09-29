@@ -14,7 +14,7 @@ custom skills.
 | `pester-testing`          | `/pester-write`   | Write Pester 5 test files for PowerShell functions, modules, and scripts                      |
 | `pester-testing`          | `/pester-review`  | Review existing Pester tests for correctness, idiomatic usage, and coverage gaps              |
 | `pester-testing`          | `/pester-run`     | Run Pester 5 tests with agent-optimized output (failures and summary only)                    |
-| `pester-testing`          | `/pester-patterns`| Ready-to-use Pester 5 recipes — mocks for filesystem, REST, credentials, DSC, and more        |
+| `pester-testing`          | `/pester-patterns`| Explicitly invoked Pester 5 recipe reference — mocks for filesystem, REST, credentials, DSC, and more |
 | `presentation-review`     | `/death-by-ppt`   | Explicitly invoke to review MARP presentations against Death by PowerPoint principles         |
 | `release-manager`         | `/release`        | Update CHANGELOG.md and bump project versions following Keep a Changelog and SemVer           |
 | `static-site-tools`       | `/og-image-design`| Explicitly invoke to design Open Graph and social sharing images                             |

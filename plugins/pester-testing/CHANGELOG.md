@@ -14,8 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `pester-patterns` is now user-invoked because recipe lookup is a deliberate
   reference workflow rather than an autonomous action. Use `/pester-patterns`
   explicitly; no compatibility alias is provided.
-- `pester-run` now owns the VS Code detached-execution branch. Pattern 0 is no
-  longer part of the patterns reference.
+- Pattern 0 is no longer part of the patterns reference.
 
 ## [1.5.2] - 2026-07-18
 
