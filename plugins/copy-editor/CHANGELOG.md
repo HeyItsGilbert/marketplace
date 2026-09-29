@@ -15,6 +15,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Restored the smart quotes and em dash, and anchored each to its Unicode
   codepoint so a future de-smart-quoting pass cannot silently break it again.
 
+### Changed
+
+- `copy-edit`: replaced the Unicode codepoint table with a named ASCII punctuation rule.
+
+
 ## [1.0.1] - 2026-05-10
 
 ### Changed
