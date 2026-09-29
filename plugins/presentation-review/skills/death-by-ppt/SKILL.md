@@ -12,7 +12,7 @@ Review MARP presentations slide by slide. Frame feedback as actionable suggestio
 
 1. **Read the complete presentation.** Identify every slide, including title and closing slides, and its intended message. Complete when no slide is omitted.
 2. **Assess each slide.** Apply the six principles and record the numeric object count for every slide. Complete when every slide has an object count and either an explicit pass or findings.
-3. **Check MARP delivery details.** Load `references/marp-delivery.md` for every presentation: apply its frontmatter and slide-break checks, then apply its feature-specific checks to slides using images, notes, pagination, or code. Complete when every applicable delivery risk is addressed.
+3. **Check delivery and pacing.** For every presentation, verify `marp: true` and a theme are present in frontmatter, then confirm intended slide breaks. When speaker notes or a presentation plan are available, verify each critical point has a spoken equivalent; flag critical information that appears only on slides. Flag runs of dense slides without breathing room. For slides using images, notes, pagination, or code, load `references/marp-delivery.md` and apply its relevant feature checks. Complete when every deck-wide delivery risk and applicable feature risk is addressed.
 4. **Report the review.** Use one slide-by-slide entry per slide. Add recommendations only for findings. Complete when every recommendation is traceable either to a slide and principle or to the applicable delivery check.
 
 ## Six principles
