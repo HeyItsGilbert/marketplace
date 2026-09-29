@@ -2,6 +2,9 @@
   {"query":"Run the Pester suite and show failures.","should_trigger":true,"notes":"Whole-suite execution branch."},
   {"query":"Run tests/Widget.Tests.ps1.","should_trigger":true,"notes":"Specific-path execution branch."},
   {"query":"Run Pester tests tagged Unit.","should_trigger":true,"notes":"Tag-filter execution branch."},
+  {"query":"Run Pester excluding Integration tests.","should_trigger":true,"notes":"Exclusion-filter execution branch."},
+  {"query":"Run only Pester tests named *Get-Widget*.","should_trigger":true,"notes":"Name-filter execution branch."},
   {"query":"Verify this PowerShell change by running its tests.","should_trigger":true,"notes":"Failing-change verification branch."},
+  {"query":"Run Pester from VS Code without freezing the PowerShell extension.","should_trigger":true,"notes":"VS Code detached-execution branch."},
   {"query":"Write Pester tests for this module.","should_trigger":false,"notes":"Test authoring is distinct."}
 ]
