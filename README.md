@@ -15,7 +15,7 @@ custom skills.
 | `pester-testing`          | `/pester-review`  | Review existing Pester tests for correctness, idiomatic usage, and coverage gaps              |
 | `pester-testing`          | `/pester-run`     | Run Pester 5 tests with agent-optimized output (failures and summary only)                    |
 | `pester-testing`          | `/pester-patterns`| Ready-to-use Pester 5 recipes — mocks for filesystem, REST, credentials, DSC, and more        |
-| `presentation-review`     | `/death-by-ppt`   | Review MARP presentations for "Death by PowerPoint" issues                                    |
+| `presentation-review`     | `/death-by-ppt`   | Explicitly invoke to review MARP presentations against Death by PowerPoint principles         |
 | `release-manager`         | `/release`        | Update CHANGELOG.md and bump project versions following Keep a Changelog and SemVer           |
 | `static-site-tools`       | `/og-image-design`| Explicitly invoke to design Open Graph and social sharing images                             |
 
@@ -30,8 +30,8 @@ Add this marketplace inside Claude Code, then install the plugins you want:
 
 Browse and toggle plugins interactively with `/plugin`. Once installed, skills
 are available in any Claude Code session — type the skill name (e.g.
-`/release`) or describe what you want and Claude will activate the matching
-skill automatically.
+`/release`). Model-invoked skills can also activate when you describe matching
+work; user-invoked reference skills must be typed explicitly.
 
 ## Repository Structure
 
