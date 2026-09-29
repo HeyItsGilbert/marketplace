@@ -1,7 +1,8 @@
 [
   {
     "query": "ok so we've merged the last few PRs for the 2.4 milestone and QA signed off yesterday. Can you bump the version and update the changelog so I can cut the release this afternoon?",
-    "should_trigger": true
+    "should_trigger": true,
+    "notes": "Release preparation branch."
   },
   {
     "query": "I need to ship v3.0.0 of this PowerShell module — there are breaking changes in the exported functions. Can you prepare the release with the changelog and manifest update?",
@@ -13,11 +14,13 @@
   },
   {
     "query": "This is our first real release of the module. We've been on 0.0.1 since we started. Time to go 1.0 — update everything we need for a proper release.",
-    "should_trigger": true
+    "should_trigger": true,
+    "notes": "First-stable-release branch."
   },
   {
     "query": "I just merged a hotfix for the auth bypass. Can you bump the patch version, update CHANGELOG.md, and open a PR so we can get this out today?",
-    "should_trigger": true
+    "should_trigger": true,
+    "notes": "Hotfix version-bump branch."
   },
   {
     "query": "we need to cut a release for the npm package. version is currently 4.1.2 in package.json. There have been 3 commits since then — two features and a bugfix. Do the changelog and version bump.",
@@ -33,11 +36,13 @@
   },
   {
     "query": "the package.json has version 1.2.3.4 which isn't standard semver. I want to normalize it and ship a proper release with a changelog entry.",
-    "should_trigger": true
+    "should_trigger": true,
+    "notes": "SemVer-normalization branch."
   },
   {
     "query": "Can you help me write a GitHub Actions workflow that automatically creates a release when I push a tag? I want it to generate release notes from the commits.",
-    "should_trigger": false
+    "should_trigger": false,
+    "notes": "CI configuration near-miss, not release preparation."
   },
   {
     "query": "I'm setting up semantic-release for this repo. Can you configure .releaserc.json with the right plugins for npm publishing and changelog generation?",
