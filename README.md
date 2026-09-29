@@ -17,7 +17,7 @@ custom skills.
 | `pester-testing`          | `/pester-patterns`| Ready-to-use Pester 5 recipes — mocks for filesystem, REST, credentials, DSC, and more        |
 | `presentation-review`     | `/death-by-ppt`   | Review MARP presentations for "Death by PowerPoint" issues                                    |
 | `release-manager`         | `/release`        | Update CHANGELOG.md and bump project versions following Keep a Changelog and SemVer           |
-| `static-site-tools`       | `/og-image-design`| Design Open Graph and social sharing images with platform specs and HTML templates            |
+| `static-site-tools`       | `/og-image-design`| Explicitly invoke to design Open Graph and social sharing images                             |
 
 ## Installation
 
