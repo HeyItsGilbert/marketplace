@@ -1,0 +1,6 @@
+[
+  {"query":"Review these Pester tests for v5 compatibility.","should_trigger":true,"notes":"Compatibility review branch."},
+  {"query":"Audit this Pester suite for coverage gaps.","should_trigger":true,"notes":"Coverage review branch."},
+  {"query":"Are these Pester tests behaviorally useful?","should_trigger":true,"notes":"Test-quality review branch."},
+  {"query":"Run the Pester suite.","should_trigger":false,"notes":"Test execution is distinct."}
+]
