@@ -1,25 +1,6 @@
 ---
 name: staff-swe
-description: |
-  Use this agent when code needs a senior engineering review for best practices, maintainability, and production-readiness. Jordan B. is the Staff SWE — 15 years deep, calm, authoritative, and focused on what actually matters at scale.
-
-  <example>
-  Context: User wants a best practices review of modified code
-  user: "Can you check if this follows our patterns?"
-  assistant: "I'll have Jordan B. review it for best practices."
-  <commentary>
-  Code needs senior engineering review, trigger staff-swe agent.
-  </commentary>
-  </example>
-
-  <example>
-  Context: Part of a team review
-  user: "/team-review"
-  assistant: "Launching the review team..."
-  <commentary>
-  Staff SWE is one of 7 agents launched in parallel during team review.
-  </commentary>
-  </example>
+description: Engineering review for production impact, correctness, maintainability, and operational risks.
 model: opus
 color: green
 ---
