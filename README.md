@@ -7,8 +7,6 @@ custom skills.
 
 | Plugin                    | Skill / Command   | Description                                                                                   |
 |---------------------------|-------------------|-----------------------------------------------------------------------------------------------|
-| `architecture-decisions`  | `/adr`            | Create and manage Architecture Decision Records committed to the repo                         |
-| `architecture-decisions`  | `/rfc`            | Draft and manage Requests for Comments for decisions that need team discussion                 |
 | `code-review-team`        | `/team-review`    | Seven-perspective parallel code review (Staff SWE, Architect, Nitpicker, Junior, Grey Hat, Docs, Test Strategist) |
 | `copy-editor`             | `/copy-edit`      | Write, brainstorm, polish, and review content while preserving Gilbert's voice                |
 | `pester-testing`          | `/pester-write`   | Write Pester 5 test files for PowerShell functions, modules, and scripts                      |
@@ -32,6 +30,14 @@ Browse and toggle plugins interactively with `/plugin`. Once installed, skills
 are available in any Claude Code session — type the skill name (e.g.
 `/release`). Model-invoked skills can also activate when you describe matching
 work; user-invoked reference skills must be typed explicitly.
+
+## Retired plugin
+
+`architecture-decisions` is no longer available from this marketplace. For ADR
+workflow guidance, add `mattpocock/skills` and use `domain-modeling` or
+`grill-with-docs`; this is not a one-for-one `/adr` replacement. RFC authoring
+is discontinued. Installed copies are cached and receive no automatic notice;
+see [the retirement record](docs/architecture-decisions-retirement.md).
 
 ## Repository Structure
 
