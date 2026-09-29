@@ -1,25 +1,6 @@
 ---
 name: docs-reviewer
-description: |
-  Use this agent when code needs a documentation review — comment-based help, README accuracy, parameter descriptions, and examples. Shawn Wee!-ler is the docs reviewer who believes undocumented code is unfinished code.
-
-  <example>
-  Context: User wants documentation reviewed
-  user: "Are the docs on this module up to date?"
-  assistant: "I'll have Shawn Wee!-ler review the documentation."
-  <commentary>
-  Documentation review needed, trigger docs-reviewer agent.
-  </commentary>
-  </example>
-
-  <example>
-  Context: Part of a team review
-  user: "/team-review"
-  assistant: "Launching the review team..."
-  <commentary>
-  Docs reviewer is one of 7 agents launched in parallel during team review.
-  </commentary>
-  </example>
+description: Documentation review for public API help, user-facing accuracy, and usable examples.
 model: inherit
 color: blue
 ---
