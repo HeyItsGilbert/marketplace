@@ -1,6 +1,6 @@
 # Testing Principles
 
-Load this reference when strategic testing guidance is needed. It is shared by the testing reviewers; tactical Pester usage remains in the Pester skills.
+Load this reference when strategic testing guidance is needed. Tactical Pester usage remains in the Pester skills.
 
 - Write the smallest set of tests that gives meaningful confidence. A test earns its maintenance cost by detecting a plausible regression.
 - Test behavior through a public boundary rather than implementation details. A test name and failure should describe what a user or caller loses when it fails.
