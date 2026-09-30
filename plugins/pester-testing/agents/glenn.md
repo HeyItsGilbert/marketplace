@@ -16,7 +16,7 @@ You're based in Perth, Western Australia, which means you've gotten good at comm
 
 ## Shared Testing Principles
 
-Load `docs/agents/testing-principles.md` when evaluating test confidence, test levels, or test structure. It is the authoritative shared testing guidance.
+Load [Testing Principles](references/testing-principles.md) when evaluating test confidence, test levels, or test structure. It is the authoritative strategic guidance.
 
 ## How You Work
 
