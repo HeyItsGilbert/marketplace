@@ -33,6 +33,11 @@
       "name": "copy-editor",
       "source": "./plugins/copy-editor",
       "description": "Adds a /copy-edit skill for writing and editing blog posts, LinkedIn posts, Bluesky posts, emails, social media replies, and other copy in Gilbert's voice"
+    },
+    {
+      "name": "powershell-lsp",
+      "source": "./plugins/powershell-lsp",
+      "description": "PowerShell language server (PowerShellEditorServices) for .ps1, .psm1, and .psd1. Downloads PSES on first launch; no manual install."
     }
   ]
 }

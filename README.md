@@ -15,6 +15,7 @@ custom skills.
 | `pester-testing`          | `/pester-patterns`| Explicitly invoked Pester 5 recipe reference — mocks for filesystem, REST, credentials, DSC, and more |
 | `presentation-review`     | `/death-by-ppt`   | Explicitly invoke to review MARP presentations against Death by PowerPoint principles         |
 | `release-manager`         | `/release`        | Update CHANGELOG.md and bump project versions following Keep a Changelog and SemVer           |
+| `powershell-lsp`          | —                 | PowerShell language server for .ps1/.psm1/.psd1. Downloads PowerShellEditorServices on first launch. |
 | `static-site-tools`       | `/og-image-design`| Explicitly invoke to design Open Graph and social sharing images                             |
 
 ## Installation
