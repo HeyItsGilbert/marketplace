@@ -1,0 +1,16 @@
+{
+  "servers": {
+    "powershell": {
+      "command": "pwsh",
+      "args": [
+        "-NoLogo",
+        "-NoProfile",
+        "-Command",
+        "$root = Join-Path $HOME '.omp/plugins/cache/plugins'; $launcher = Get-ChildItem -Path $root -Filter 'my-plugins___powershell-lsp___*' -Directory | Sort-Object Name -Descending | Select-Object -First 1 | ForEach-Object { Join-Path $_.FullName 'scripts/start-pses-lsp.ps1' }; if (-not $launcher) { throw 'powershell-lsp launcher not installed' }; & $launcher"
+      ],
+      "fileTypes": [".ps1", ".psm1", ".psd1"],
+      "languageId": "powershell",
+      "rootMarkers": [".git", "*.ps1", "*.psm1", "*.psd1"]
+    }
+  }
+}
