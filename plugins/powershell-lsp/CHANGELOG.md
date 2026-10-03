@@ -8,6 +8,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.1] - 2026-10-03
+
+### Fixed
+
+- Validated PSES release versions before using them in cache paths, rejected
+  downloads without a trusted SHA-256, and atomically published installations
+  under a per-version bootstrap lock.
+- Passed launcher and PSES paths as process arguments, preserving valid paths
+  containing apostrophes.
+- Used unique temporary PSES session files on every platform and propagated
+  bridge and unexpected child-process failures.
+
 ## [1.4.0] - 2026-10-02
 
 ### Changed

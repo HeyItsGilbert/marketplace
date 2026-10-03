@@ -1,6 +1,6 @@
 {
   "name": "powershell-lsp",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "PowerShell language server (PowerShellEditorServices) for Claude Code's LSP tool. Adds goToDefinition, hover, findReferences, and documentSymbol for .ps1/.psm1/.psd1 files. Uses a stdio-to-named-pipe proxy because PowerShell's I/O wrapping breaks PSES under raw stdio on Windows. Auto-downloads PowerShellEditorServices from GitHub releases on first launch and caches it under the user's local app data.",
   "author": {
     "name": "Gilbert Sanchez"
@@ -12,8 +12,8 @@
       "args": [
         "-NoLogo",
         "-NoProfile",
-        "-Command",
-        "& '${CLAUDE_PLUGIN_ROOT}/scripts/start-pses-lsp.ps1'"
+        "-File",
+        "${CLAUDE_PLUGIN_ROOT}/scripts/start-pses-lsp.ps1"
       ],
       "extensionToLanguage": {
         ".ps1": "powershell",
