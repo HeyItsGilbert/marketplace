@@ -48,7 +48,7 @@ Set-Content -LiteralPath $SessionDetailsPath -Value '{}'
             & pwsh -NoLogo -NoProfile -File $apostropheLauncherPath
 
             $LASTEXITCODE | Should -Be 0
-            $sessionPath = Get-Content -LiteralPath $markerPath -Raw
+            $sessionPath = Get-Content -LiteralPath $markerPath
             $sessionPath | Should -Match ([regex]::Escape([System.IO.Path]::GetTempPath()))
             $sessionPath | Should -Not -Exist
         } finally {

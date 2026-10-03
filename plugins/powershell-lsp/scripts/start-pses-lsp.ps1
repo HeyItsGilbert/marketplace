@@ -167,7 +167,6 @@ if (-not (Test-Path -Path $startScript)) {
                     $expectedFrom = 'hardcoded fallback table'
                 }
                 if (-not $expected) {
-                    $preserveZip = $true
                     throw "No trusted SHA-256 is available for PSES v$PsesVersion. Refusing to extract unverified archive: $tempZip"
                 }
                 if ($actualHash -ine $expected) {
