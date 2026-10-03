@@ -27,10 +27,12 @@
     Status output goes to stderr only (Claude Code's debug log captures it).
 
 .PARAMETER PsesVersion
-    PSES version to use. Defaults to env var CLAUDE_PSES_VERSION, else 4.5.0.
+    PSES release version in `X.Y.Z` or `X.Y.Z-prerelease` form. Defaults to
+    env var CLAUDE_PSES_VERSION, else 4.5.0. GitHub tag prefixes (for example,
+    `v4.5.0`) and non-release values are rejected.
 
 .EXAMPLE
-    pwsh -NoLogo -NoProfile -Command "& '${CLAUDE_PLUGIN_ROOT}/scripts/start-pses-lsp.ps1'"
+    pwsh -NoLogo -NoProfile -File (Join-Path $env:CLAUDE_PLUGIN_ROOT 'scripts/start-pses-lsp.ps1') -PsesVersion '4.5.0'
 #>
 [CmdletBinding()]
 param(
@@ -60,7 +62,7 @@ if ([string]::IsNullOrWhiteSpace($PsesVersion)) {
 }
 
 if ($PsesVersion -notmatch '^\d+\.\d+\.\d+(?:-[0-9A-Za-z][0-9A-Za-z.-]*)?$') {
-    throw "PSES version '$PsesVersion' must be a semantic release version."
+    throw "PSES version '$PsesVersion' must match the PSES release format X.Y.Z or X.Y.Z-prerelease."
 }
 
 # Hardcoded SHA-256 fallbacks for known-good PSES release zips.
@@ -286,6 +288,10 @@ $psesPsi.RedirectStandardOutput = $true
 $psesPsi.RedirectStandardError  = $true
 $psesPsi.RedirectStandardInput  = $true
 
+$psesProc = $null
+$pipeClient = $null
+$cts = $null
+$cleanupCompleted = $false
 try {
 $psesProc = [System.Diagnostics.Process]::Start($psesPsi)
 Write-Status "PSES PID: $($psesProc.Id)"
@@ -314,20 +320,20 @@ while ((Get-Date) -lt $sessionDeadline) {
         try {
             $session = Get-Content -Path $sessionFile -Raw | ConvertFrom-Json
             Write-Status "PSES session details: $(($session | ConvertTo-Json -Compress))"
-            $candidate = $null
+            $sessionPipeName = $null
             foreach ($field in @('languageServicePipeName', 'languageServiceTransport', 'languageServicePipeNameInbound')) {
                 if ($session.PSObject.Properties[$field] -and $session.$field) {
-                    $candidate = [string]$session.$field
+                    $sessionPipeName = [string]$session.$field
                     break
                 }
             }
-            if (-not $candidate) {
-                $candidate = $pipeName
+            if (-not $sessionPipeName) {
+                $sessionPipeName = $pipeName
             }
-            if ($candidate -match '^\\\\\.\\pipe\\(.+)$') {
-                $candidate = $Matches[1]
+            if ($sessionPipeName -match '^\\\\\.\\pipe\\(.+)$') {
+                $sessionPipeName = $Matches[1]
             }
-            $actualPipeName = $candidate
+            $actualPipeName = $sessionPipeName
             Write-Status "Will connect to pipe name: '$actualPipeName'"
             break
         } catch {
@@ -352,18 +358,18 @@ while ((Get-Date) -lt $connectDeadline) {
         throw "PSES died during pipe connect"
     }
     try {
-        $candidate = [System.IO.Pipes.NamedPipeClientStream]::new(
+        $pipeConnection = [System.IO.Pipes.NamedPipeClientStream]::new(
             '.',
             $actualPipeName,
             [System.IO.Pipes.PipeDirection]::InOut,
             [System.IO.Pipes.PipeOptions]::Asynchronous
         )
-        $candidate.Connect(1000)
-        if ($candidate.IsConnected) {
-            $pipeClient = $candidate
+        $pipeConnection.Connect(1000)
+        if ($pipeConnection.IsConnected) {
+            $pipeClient = $pipeConnection
             break
         }
-        $candidate.Dispose()
+        $pipeConnection.Dispose()
     } catch [System.TimeoutException] {
         # Retry
     } catch {
@@ -404,27 +410,58 @@ try {
 }
 
 # --- 6. Cleanup ---
+# Give PSES a short opportunity to report its own exit before terminating it.
 $terminatedByCleanup = $false
+$childExitCode = $null
+if ($psesProc.WaitForExit(250)) {
+    $childExitCode = $psesProc.ExitCode
+}
+
 $cts.Cancel()
 try { $pipeClient.Dispose() } catch {}
 try {
-    if (-not $psesProc.HasExited) {
+    if ($null -eq $childExitCode -and -not $psesProc.HasExited) {
         $psesProc.Kill()
         $terminatedByCleanup = $true
         $psesProc.WaitForExit(5000) | Out-Null
     }
 } catch {}
-$childExitedUnexpectedly = -not $terminatedByCleanup -and $psesProc.HasExited
-$childExitCode = if ($childExitedUnexpectedly) { $psesProc.ExitCode } else { $null }
+
+if (-not $terminatedByCleanup -and $psesProc.HasExited) {
+    $childExitCode = $psesProc.ExitCode
+}
+
 $cts.Dispose()
-Write-Status "Bridge shut down (PSES exit code: $(if ($psesProc.HasExited) { $psesProc.ExitCode } else { 'still running' }))."
+$psesProc.Dispose()
+$cleanupCompleted = $true
+Write-Status "Bridge shut down (PSES exit code: $(if ($null -ne $childExitCode) { $childExitCode } else { 'terminated by launcher' }))."
 
 if ($bridgeFailure) {
     throw "Bridge error: $($bridgeFailure.Message)"
 }
-if ($childExitedUnexpectedly -and $childExitCode -ne 0) {
+if ($null -ne $childExitCode -and $childExitCode -ne 0) {
     throw "PSES exited unexpectedly with exit code $childExitCode."
 }
 } finally {
+    if (-not $cleanupCompleted) {
+        if ($cts) {
+            try { $cts.Cancel() } catch {}
+        }
+        if ($pipeClient) {
+            try { $pipeClient.Dispose() } catch {}
+        }
+        if ($psesProc) {
+            try {
+                if (-not $psesProc.HasExited) {
+                    $psesProc.Kill()
+                    $psesProc.WaitForExit(5000) | Out-Null
+                }
+            } catch {}
+            $psesProc.Dispose()
+        }
+        if ($cts) {
+            $cts.Dispose()
+        }
+    }
     Remove-Item -Path $sessionFile -Force -ErrorAction SilentlyContinue
 }

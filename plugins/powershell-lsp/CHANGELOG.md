@@ -20,7 +20,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Used unique temporary PSES session files on every platform and propagated
   bridge and unexpected child-process failures.
 
-
 ## [1.4.0] - 2026-10-02
 
 ### Changed
