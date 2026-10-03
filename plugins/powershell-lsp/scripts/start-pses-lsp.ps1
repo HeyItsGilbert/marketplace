@@ -59,6 +59,10 @@ if ([string]::IsNullOrWhiteSpace($PsesVersion)) {
     $PsesVersion = '4.5.0'
 }
 
+if ($PsesVersion -notmatch '^\d+\.\d+\.\d+(?:-[0-9A-Za-z][0-9A-Za-z.-]*)?$') {
+    throw "PSES version '$PsesVersion' must be a semantic release version."
+}
+
 # Hardcoded SHA-256 fallbacks for known-good PSES release zips.
 # Used only when the GitHub Releases API is unreachable (network down, rate-limited, etc.).
 # Primary trust anchor is the `digest` field on the release asset, fetched live from GitHub.
@@ -116,75 +120,117 @@ function Get-CacheRoot {
 }
 
 # --- 1. Bootstrap PSES from cache or download from GitHub releases (cross-platform) ---
-$installDir  = Join-Path -Path (Get-CacheRoot) -ChildPath $PsesVersion
+$cacheRoot   = Get-CacheRoot
+$installDir  = Join-Path -Path $cacheRoot -ChildPath $PsesVersion
 $startScript = Join-Path -Path $installDir -ChildPath 'PowerShellEditorServices/Start-EditorServices.ps1'
 
 if (-not (Test-Path -Path $startScript)) {
-    Write-Status "PowerShellEditorServices v$PsesVersion not cached. Downloading from GitHub releases..."
-    $downloadUrl = "https://github.com/PowerShell/PowerShellEditorServices/releases/download/v$PsesVersion/PowerShellEditorServices.zip"
-    $tempZip     = Join-Path -Path ([System.IO.Path]::GetTempPath()) -ChildPath "pses-$PsesVersion-$([guid]::NewGuid()).zip"
-    $preserveZip = $false  # set $true on hash mismatch so the operator can inspect
-
+    $bootstrapMutex = [System.Threading.Mutex]::new($false, "claude-code-powershell-lsp-$PsesVersion")
+    $mutexAcquired = $false
     try {
-        New-Item -ItemType Directory -Path $installDir -Force | Out-Null
-        $oldProgress = $ProgressPreference
-        $ProgressPreference = 'SilentlyContinue'
         try {
-            Invoke-WebRequest -Uri $downloadUrl -OutFile $tempZip -UseBasicParsing
-        } finally {
-            $ProgressPreference = $oldProgress
+            $mutexAcquired = $bootstrapMutex.WaitOne([TimeSpan]::FromMinutes(2))
+        } catch [System.Threading.AbandonedMutexException] {
+            # The previous bootstrapper died; its installation was never published atomically.
+            $mutexAcquired = $true
+        }
+        if (-not $mutexAcquired) {
+            throw "Timed out waiting to bootstrap PSES v$PsesVersion."
         }
 
-        # Verify the download. Trust order: (1) GitHub Releases API `digest` field
-        # (upstream-authoritative, works for any version including overrides), (2) hardcoded
-        # fallback hash table (offline-safe for the pinned default version). Fail closed:
-        # if neither source agrees with the actual hash, refuse to extract and preserve the
-        # bad bytes for inspection.
-        $actualHash   = (Get-FileHash -Path $tempZip -Algorithm SHA256).Hash
-        $expected     = Get-PsesExpectedHashFromGitHub -Version $PsesVersion
-        $expectedFrom = 'GitHub Releases API'
-        if (-not $expected) {
-            $expected     = $FallbackHashes[$PsesVersion]
-            $expectedFrom = 'hardcoded fallback table'
-        }
-        if ($expected) {
-            if ($actualHash -ine $expected) {
-                $preserveZip = $true
-                throw @"
+        # A concurrent launcher may have completed while this instance waited for the lock.
+        if (-not (Test-Path -Path $startScript)) {
+            Write-Status "PowerShellEditorServices v$PsesVersion not cached. Downloading from GitHub releases..."
+            New-Item -ItemType Directory -Path $cacheRoot -Force | Out-Null
+            $stagingDir         = Join-Path -Path $cacheRoot -ChildPath ".${PsesVersion}-$([guid]::NewGuid().ToString('N')).staging"
+            $previousInstallDir = $null
+            $tempZip            = Join-Path -Path ([System.IO.Path]::GetTempPath()) -ChildPath "pses-$PsesVersion-$([guid]::NewGuid()).zip"
+            $preserveZip        = $false
+
+            try {
+                $downloadUrl = "https://github.com/PowerShell/PowerShellEditorServices/releases/download/v$PsesVersion/PowerShellEditorServices.zip"
+                $oldProgress = $ProgressPreference
+                $ProgressPreference = 'SilentlyContinue'
+                try {
+                    Invoke-WebRequest -Uri $downloadUrl -OutFile $tempZip -UseBasicParsing
+                } finally {
+                    $ProgressPreference = $oldProgress
+                }
+
+                $actualHash   = (Get-FileHash -Path $tempZip -Algorithm SHA256).Hash
+                $expected     = Get-PsesExpectedHashFromGitHub -Version $PsesVersion
+                $expectedFrom = 'GitHub Releases API'
+                if (-not $expected) {
+                    $expected     = $FallbackHashes[$PsesVersion]
+                    $expectedFrom = 'hardcoded fallback table'
+                }
+                if (-not $expected) {
+                    $preserveZip = $true
+                    throw "No trusted SHA-256 is available for PSES v$PsesVersion. Refusing to extract unverified archive: $tempZip"
+                }
+                if ($actualHash -ine $expected) {
+                    $preserveZip = $true
+                    throw @"
 PSES v$PsesVersion download SHA-256 mismatch — refusing to extract.
   Expected: $expected (from $expectedFrom)
   Actual:   $actualHash
   Source:   $downloadUrl
   Bad zip:  $tempZip (preserved for inspection — delete manually after review)
 "@
-            }
-            Write-Status "SHA-256 verified against $expectedFrom`: $actualHash"
-        } else {
-            Write-Status "WARNING: no expected hash available for PSES v$PsesVersion (GitHub API unreachable AND no fallback)."
-            Write-Status "  Computed SHA-256 (record this in `$FallbackHashes if you trust it): $actualHash"
-        }
+                }
+                Write-Status "SHA-256 verified against $expectedFrom`: $actualHash"
 
-        Write-Status "Extracting to $installDir..."
-        Expand-Archive -Path $tempZip -DestinationPath $installDir -Force
-    } catch {
-        # On any failure (download, hash mismatch, extract) clean the partial install dir
-        # so the next run re-downloads instead of using a half-extracted cache.
-        Remove-Item -Path $installDir -Recurse -Force -ErrorAction SilentlyContinue
-        throw
-    } finally {
-        # Always clean up the temp zip unless we explicitly want to preserve it for inspection.
-        if (-not $preserveZip -and (Test-Path -Path $tempZip)) {
-            Remove-Item -Path $tempZip -Force -ErrorAction SilentlyContinue
+                Write-Status "Extracting PSES v$PsesVersion into staging..."
+                Expand-Archive -Path $tempZip -DestinationPath $stagingDir -Force
+                $stagedStartScript = Join-Path -Path $stagingDir -ChildPath 'PowerShellEditorServices/Start-EditorServices.ps1'
+                if (-not (Test-Path -Path $stagedStartScript)) {
+                    throw "PSES extraction did not produce expected file: $stagedStartScript"
+                }
+
+                # Publish only a complete, verified installation while still holding the version lock.
+                # Renames within the cache root are atomic; preserve a legacy partial install until
+                # the staged installation is successfully published.
+                if (Test-Path -Path $installDir) {
+                    $previousInstallDir = "$installDir.previous-$([guid]::NewGuid().ToString('N'))"
+                    Move-Item -Path $installDir -Destination $previousInstallDir -ErrorAction Stop
+                }
+                Move-Item -Path $stagingDir -Destination $installDir -ErrorAction Stop
+                $stagingDir = $null
+                if ($previousInstallDir) {
+                    Remove-Item -Path $previousInstallDir -Recurse -Force -ErrorAction SilentlyContinue
+                    $previousInstallDir = $null
+                }
+                Write-Status "PowerShellEditorServices v$PsesVersion installed."
+            } catch {
+                if ($previousInstallDir -and (Test-Path -Path $previousInstallDir) -and -not (Test-Path -Path $installDir)) {
+                    Move-Item -Path $previousInstallDir -Destination $installDir -ErrorAction SilentlyContinue
+                }
+                if ($stagingDir -and (Test-Path -Path $stagingDir)) {
+                    Remove-Item -Path $stagingDir -Recurse -Force -ErrorAction SilentlyContinue
+                }
+                throw
+            }
+            finally {
+                if (-not $preserveZip -and (Test-Path -Path $tempZip)) {
+                    Remove-Item -Path $tempZip -Force -ErrorAction SilentlyContinue
+                }
+            }
         }
+    } finally {
+        if ($mutexAcquired) {
+            $bootstrapMutex.ReleaseMutex()
+        }
+        $bootstrapMutex.Dispose()
     }
-    if (-not (Test-Path -Path $startScript)) {
-        throw "PSES extraction did not produce expected file: $startScript"
-    }
-    Write-Status "PowerShellEditorServices v$PsesVersion installed."
 }
 
-$tempBase = [System.IO.Path]::GetTempPath()
-$logPath  = Join-Path -Path $tempBase -ChildPath 'pses-claude-lsp.log'
+if (-not (Test-Path -Path $startScript)) {
+    throw "PSES installation did not produce expected file: $startScript"
+}
+
+$tempBase    = [System.IO.Path]::GetTempPath()
+$logPath     = Join-Path -Path $tempBase -ChildPath 'pses-claude-lsp.log'
+$sessionFile = Join-Path -Path $tempBase -ChildPath "pses-claude-lsp-session-$PID-$([guid]::NewGuid().ToString('N')).json"
 
 # --- 2. Non-Windows: direct stdio invocation. PowerShell on Linux/macOS doesn't have the
 #        host-I/O wrapping issue that breaks PSES stdio on Windows. ---
@@ -196,10 +242,15 @@ if (-not $IsWindowsPlatform) {
         HostVersion         = '1.0.0'
         LanguageServiceOnly = $true
         Stdio               = $true
+        SessionDetailsPath  = $sessionFile
         LogPath             = $logPath
         LogLevel            = 'Information'
     }
-    & $startScript @directSplat
+    try {
+        & $startScript @directSplat
+    } finally {
+        Remove-Item -Path $sessionFile -Force -ErrorAction SilentlyContinue
+    }
     return
 }
 
@@ -207,34 +258,27 @@ if (-not $IsWindowsPlatform) {
 # Use a bare pipe name — .NET NamedPipeServerStream / NamedPipeClientStream take just the
 # name; the OS prepends \\.\pipe\ automatically. Passing the prefix produces a double-
 # prefixed pipe that the client cannot reach.
-$pipeName    = "claude-pses-$([guid]::NewGuid().ToString('N').Substring(0, 12))"
-$sessionFile = Join-Path -Path $tempBase -ChildPath "pses-claude-lsp-session-$PID.json"
-
-# Stale session file from a previous crashed run will confuse PSES — clean up.
-Remove-Item -Path $sessionFile -Force -ErrorAction SilentlyContinue
+$pipeName = "claude-pses-$([guid]::NewGuid().ToString('N').Substring(0, 12))"
 
 Write-Status "Starting PSES with bare pipe name '$pipeName' (OS path: \\.\pipe\$pipeName)"
 
-# Build PSES launch command. Use -Command (not -File) and only required args.
-# LogLevel must be passed explicitly (PSES bug: ValidateSet rejects $null on reassignment).
-$psesCommand = @"
-& '$startScript' ``
-  -HostName 'claude-lsp' ``
-  -HostProfileId 'ClaudeLSP' ``
-  -HostVersion '1.0.0' ``
-  -LanguageServiceOnly ``
-  -LanguageServicePipeName '$pipeName' ``
-  -SessionDetailsPath '$sessionFile' ``
-  -LogPath '$logPath' ``
-  -LogLevel Information
-"@
-
+# Pass paths as process arguments rather than interpolating them into PowerShell source.
+# This supports legal apostrophes and other special characters in cache and temp paths.
 $psesPsi = [System.Diagnostics.ProcessStartInfo]::new()
 $psesPsi.FileName = 'pwsh'
-$psesPsi.ArgumentList.Add('-NoLogo')
-$psesPsi.ArgumentList.Add('-NoProfile')
-$psesPsi.ArgumentList.Add('-Command')
-$psesPsi.ArgumentList.Add($psesCommand)
+foreach ($argument in @(
+    '-NoLogo', '-NoProfile', '-File', $startScript,
+    '-HostName', 'claude-lsp',
+    '-HostProfileId', 'ClaudeLSP',
+    '-HostVersion', '1.0.0',
+    '-LanguageServiceOnly',
+    '-LanguageServicePipeName', $pipeName,
+    '-SessionDetailsPath', $sessionFile,
+    '-LogPath', $logPath,
+    '-LogLevel', 'Information'
+)) {
+    $psesPsi.ArgumentList.Add($argument)
+}
 $psesPsi.UseShellExecute        = $false
 $psesPsi.CreateNoWindow         = $true
 # Detach PSES from our stdio entirely — it uses the named pipe, not stdio.
@@ -242,6 +286,7 @@ $psesPsi.RedirectStandardOutput = $true
 $psesPsi.RedirectStandardError  = $true
 $psesPsi.RedirectStandardInput  = $true
 
+try {
 $psesProc = [System.Diagnostics.Process]::Start($psesPsi)
 Write-Status "PSES PID: $($psesProc.Id)"
 
@@ -342,20 +387,44 @@ $stdinToPipe  = $stdin.CopyToAsync($pipeClient, 4096, $cts.Token)
 $pipeToStdout = $pipeClient.CopyToAsync($stdout, 4096, $cts.Token)
 
 # Wait for either side to finish (LSP shutdown, connection drop, or PSES exit).
+$bridgeFailure = $null
+$bridgeTasks = @($stdinToPipe, $pipeToStdout)
 try {
-    [System.Threading.Tasks.Task]::WaitAny(@($stdinToPipe, $pipeToStdout)) | Out-Null
+    $completedIndex = [System.Threading.Tasks.Task]::WaitAny($bridgeTasks)
+    $bridgeTasks[$completedIndex].GetAwaiter().GetResult()
+
+    # A simultaneous fault must not be hidden by the first normally completed task.
+    foreach ($bridgeTask in $bridgeTasks) {
+        if ($bridgeTask.IsCompleted) {
+            $bridgeTask.GetAwaiter().GetResult()
+        }
+    }
 } catch {
-    Write-Status "Bridge error: $($_.Exception.Message)"
+    $bridgeFailure = $_.Exception
 }
 
 # --- 6. Cleanup ---
+$terminatedByCleanup = $false
 $cts.Cancel()
 try { $pipeClient.Dispose() } catch {}
 try {
     if (-not $psesProc.HasExited) {
         $psesProc.Kill()
+        $terminatedByCleanup = $true
         $psesProc.WaitForExit(5000) | Out-Null
     }
 } catch {}
-Remove-Item -Path $sessionFile -Force -ErrorAction SilentlyContinue
+$childExitedUnexpectedly = -not $terminatedByCleanup -and $psesProc.HasExited
+$childExitCode = if ($childExitedUnexpectedly) { $psesProc.ExitCode } else { $null }
+$cts.Dispose()
 Write-Status "Bridge shut down (PSES exit code: $(if ($psesProc.HasExited) { $psesProc.ExitCode } else { 'still running' }))."
+
+if ($bridgeFailure) {
+    throw "Bridge error: $($bridgeFailure.Message)"
+}
+if ($childExitedUnexpectedly -and $childExitCode -ne 0) {
+    throw "PSES exited unexpectedly with exit code $childExitCode."
+}
+} finally {
+    Remove-Item -Path $sessionFile -Force -ErrorAction SilentlyContinue
+}

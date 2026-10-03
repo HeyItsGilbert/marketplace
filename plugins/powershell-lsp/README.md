@@ -93,6 +93,10 @@ $env:CLAUDE_PSES_VERSION = '4.4.0'
 ```
 
 Available versions: <https://github.com/PowerShell/PowerShellEditorServices/releases>.
+A version override is accepted only when the GitHub Releases API supplies its
+SHA-256 digest (or the version has a bundled fallback hash); the launcher never
+extracts an archive without a trusted hash.
+
 
 ## Troubleshooting
 
