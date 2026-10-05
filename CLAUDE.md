@@ -4,12 +4,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What This Repo Is
 
-A Claude Code plugin marketplace — a collection of plugins that extend Claude Code with custom skills. The root `.claude-plugin/marketplace.json` is the marketplace manifest that indexes all available plugins.
+A Claude Code plugin marketplace — a collection of plugins that extend Claude Code with custom skills. The root `.claude-plugin/marketplace.json` is the Claude Code marketplace manifest; `.omp-plugin/marketplace.json` is the parallel catalog omp prefers (exclusively — it does not fall back to the Claude path once present). A plugin usable under both tools is registered in both files; an omp-only plugin (e.g. one that relies on omp-specific `bash` service/long-poll conventions) is registered in `.omp-plugin/marketplace.json` alone.
 
 ## Architecture
 
 ```
-.claude-plugin/marketplace.json    # Marketplace manifest: lists all plugins with name, source path, description
+.claude-plugin/marketplace.json    # Claude Code catalog: plugins usable in Claude Code
+.omp-plugin/marketplace.json       # omp catalog: every plugin, including omp-only ones
 plugins/
   <plugin-name>/
     .claude-plugin/plugin.json     # Plugin manifest: name, description, version
@@ -18,7 +19,7 @@ plugins/
         SKILL.md                   # Skill definition: frontmatter (name, description) + prompt content
 ```
 
-**Marketplace manifest** (`.claude-plugin/marketplace.json`): Top-level registry. Each entry in `plugins[]` has a `name`, `source` (relative path to the plugin directory), and `description`.
+**Marketplace manifests** (`.claude-plugin/marketplace.json`, `.omp-plugin/marketplace.json`): Top-level registries, same schema. Each entry in `plugins[]` has a `name`, `source` (relative path to the plugin directory), and `description`. omp reads whichever file is present, preferring the omp-specific one; a plugin not meant for Claude Code is omitted from the Claude catalog.
 
 **Plugin manifest** (`plugin.json`): Declares a single plugin's identity and version.
 
@@ -28,7 +29,7 @@ plugins/
 
 1. Create `plugins/<plugin-name>/.claude-plugin/plugin.json` with name, description, and version.
 2. Create `plugins/<plugin-name>/skills/<skill-name>/SKILL.md` with frontmatter and skill instructions.
-3. Register the plugin in `.claude-plugin/marketplace.json` by adding an entry to the `plugins` array.
+3. Register the plugin in `.claude-plugin/marketplace.json`, and in `.omp-plugin/marketplace.json` if it should also be installable there — omit it from `.claude-plugin/marketplace.json` if it only works under omp.
 
 ## Eval Workspaces
 

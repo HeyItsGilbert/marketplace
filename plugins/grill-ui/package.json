@@ -1,0 +1,10 @@
+{
+  "name": "grill-ui",
+  "private": true,
+  "devDependencies": {
+    "jsdom": "^30.1.2"
+  },
+  "scripts": {
+    "test": "bun test skills/grill-ui/server/server.test.ts && node --test skills/grill-ui/server/public/app.test.mjs"
+  }
+}

@@ -18,6 +18,11 @@ custom skills.
 | `powershell-lsp`          | —                 | PowerShell language server for .ps1/.psm1/.psd1. Downloads PowerShellEditorServices on first launch. |
 | `static-site-tools`       | `/og-image-design`| Explicitly invoke to design Open Graph and social sharing images                             |
 
+The `grill-ui` plugin (`/grill-ui` — grilling-style interviews rendered as a
+local Typeform-style browser page, driven by a bundled Bun server) is **not**
+in this table because it's omp only and lives in a separate catalog; see
+[Repository Structure](#repository-structure).
+
 ## Installation
 
 Add this marketplace inside Claude Code, then install the plugins you want:
@@ -25,6 +30,15 @@ Add this marketplace inside Claude Code, then install the plugins you want:
 ```text
 /plugin marketplace add HeyItsGilbert/marketplace
 /plugin install pester-testing@my-plugins
+```
+
+omp reads the same repository but prefers its own catalog
+(`.omp-plugin/marketplace.json`) over the Claude one when both exist, so an
+omp user adding this marketplace sees every plugin above plus `grill-ui`:
+
+```text
+/marketplace add HeyItsGilbert/marketplace
+/marketplace install grill-ui@my-plugins
 ```
 
 Browse and toggle plugins interactively with `/plugin`. Once installed, skills
@@ -43,7 +57,8 @@ see [the retirement record](docs/architecture-decisions-retirement.md).
 ## Repository Structure
 
 ```
-.claude-plugin/marketplace.json   # Marketplace manifest — indexes all plugins
+.claude-plugin/marketplace.json   # Claude Code catalog — every plugin except grill-ui
+.omp-plugin/marketplace.json      # omp catalog — every plugin, including the omp-only grill-ui
 plugins/
   <plugin-name>/
     .claude-plugin/plugin.json    # Plugin manifest — name, description, version
@@ -51,6 +66,14 @@ plugins/
       <skill-name>/
         SKILL.md                  # Skill definition — frontmatter + prompt
 ```
+
+omp prefers `.omp-plugin/marketplace.json` and falls back to
+`.claude-plugin/marketplace.json` only when the omp-specific file is absent —
+the two catalogs are read exclusively, never merged. A plugin that only works
+under omp (like `grill-ui`, which launches a local Bun server via omp's
+`bash` service conventions) belongs in `.omp-plugin/marketplace.json` alone,
+so Claude Code users never see an entry they can't use. A plugin that works
+under both stays listed in both files.
 
 ## Creating Your Own Plugin
 
@@ -67,5 +90,7 @@ plugins/
 2. Create `plugins/<your-plugin>/skills/<your-skill>/SKILL.md` with YAML
    frontmatter (`name`, `description`) and the skill prompt as the markdown
    body.
-3. Register it in `.claude-plugin/marketplace.json` by adding an entry to the
-   `plugins` array.
+3. Register it in `.claude-plugin/marketplace.json` (and, if it works under
+   omp too, `.omp-plugin/marketplace.json`) by adding an entry to the
+   `plugins` array. If the plugin only works under omp, register it in
+   `.omp-plugin/marketplace.json` alone.
