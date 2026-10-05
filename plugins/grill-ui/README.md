@@ -22,6 +22,25 @@ or, under Claude Code:
 
 **Prerequisite:** [Bun](https://bun.sh) on `PATH`. The server is a `.ts` file run directly with `bun run`.
 
+## Configuration
+
+Always want a non-default port, or want the link advertised in the
+startup log to use a hostname other than loopback (a Tailscale/VPN name,
+a reverse-proxy domain)? Drop a config file at
+`$XDG_CONFIG_HOME/grill-ui/config.json` (or `~/.config/grill-ui/config.json`):
+
+```json
+{
+  "host": "127.0.0.1",
+  "port": 5173,
+  "advertiseHost": "my-box.ts.net"
+}
+```
+
+All fields are optional. `GRILL_UI_HOST`/`GRILL_UI_PORT`/`GRILL_UI_ADVERTISE_HOST`
+env vars (and `GRILL_UI_CONFIG_PATH` to point at a different config file)
+override the matching field for a single launch without touching the file.
+
 ## Usage pattern: chat first, escalate to grill-ui
 
 `/grill-ui` is **user-invoked** (`disable-model-invocation: true`), deliberately — it doesn't auto-fire the moment a conversation looks like a design discussion. Two reasons:

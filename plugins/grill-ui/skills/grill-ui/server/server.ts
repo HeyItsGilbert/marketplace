@@ -13,7 +13,9 @@
 // one) just a matter of opening two tabs instead of hunting for a second
 // free port.
 
-import { networkInterfaces } from "node:os";
+import { homedir, networkInterfaces } from "node:os";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 
 type Option = { label: string; description?: string; preview?: string };
 type Question = {
@@ -347,16 +349,79 @@ function lanAddresses(): string[] {
   return addresses;
 }
 
+// Optional on-disk preferences so a user who always wants the same port
+// (or a non-loopback hostname advertised in the startup link — a
+// Tailscale/VPN name, a reverse-proxy domain, etc.) doesn't have to set
+// `GRILL_UI_*` env vars on every single `bun run server.ts`. Env vars still
+// win when set, so a one-off override never has to touch the file.
+type FileConfig = { host?: string; port?: number; advertiseHost?: string };
+
+// Narrows an unknown decoded JSON value to the subset of fields this
+// server understands, dropping anything the wrong type or empty — a
+// malformed or partially-garbage config file degrades to "unset" for the
+// affected field(s) instead of crashing startup or poisoning a value with
+// e.g. `NaN`.
+export function parseFileConfig(raw: string): FileConfig {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    return {};
+  }
+  if (typeof parsed !== "object" || parsed === null) return {};
+  const obj = parsed as Record<string, unknown>;
+  const config: FileConfig = {};
+  if (typeof obj.host === "string" && obj.host.trim()) config.host = obj.host.trim();
+  if (typeof obj.port === "number" && Number.isInteger(obj.port) && obj.port > 0) config.port = obj.port;
+  if (typeof obj.advertiseHost === "string" && obj.advertiseHost.trim()) config.advertiseHost = obj.advertiseHost.trim();
+  return config;
+}
+
+function loadFileConfig(path: string): FileConfig {
+  try {
+    return parseFileConfig(readFileSync(path, "utf8"));
+  } catch {
+    // No config file, or it's unreadable — an optional preferences file
+    // missing or unusable should never fail the whole server start.
+    return {};
+  }
+}
+
+function defaultConfigPath(): string {
+  const xdgConfigHome = process.env.XDG_CONFIG_HOME || join(homedir(), ".config");
+  return join(xdgConfigHome, "grill-ui", "config.json");
+}
+
+// Precedence: env var > config file > built-in default, applied field by
+// field — e.g. a config file with only `advertiseHost` set still falls
+// through to the default port and `GRILL_UI_PORT`, it doesn't force the
+// caller to repeat every field just to set one.
+export function resolveServerConfig(
+  fileConfig: FileConfig,
+  env: Record<string, string | undefined>,
+): { host: string; port: number; advertiseHost: string } {
+  const envPort = Number(env.GRILL_UI_PORT);
+  return {
+    host: env.GRILL_UI_HOST || fileConfig.host || "127.0.0.1",
+    port: (Number.isInteger(envPort) && envPort > 0 ? envPort : undefined) ?? fileConfig.port ?? 4829,
+    advertiseHost: env.GRILL_UI_ADVERTISE_HOST || fileConfig.advertiseHost || "127.0.0.1",
+  };
+}
+
 if (import.meta.main) {
-  const requestedHost = process.env.GRILL_UI_HOST || "127.0.0.1";
-  const requestedPort = Number(process.env.GRILL_UI_PORT) || 4829;
+  const configPath = process.env.GRILL_UI_CONFIG_PATH || defaultConfigPath();
+  const fileConfig = loadFileConfig(configPath);
+  const { host: requestedHost, port: requestedPort, advertiseHost } = resolveServerConfig(fileConfig, process.env);
   const server = startServer(requestedHost, requestedPort);
 
   // The `bash` tool's service readiness check matches this line via a log
-  // regex. Always printed against the loopback address: a 0.0.0.0 bind
-  // still accepts loopback connections, so this stays valid regardless of
-  // GRILL_UI_HOST.
-  console.log(`Listening on http://127.0.0.1:${server.port}`);
+  // regex ("Listening on"), independent of the host text — `advertiseHost`
+  // defaults to loopback (always reachable from this machine regardless of
+  // what `GRILL_UI_HOST` bound to) but can be overridden via
+  // `GRILL_UI_ADVERTISE_HOST` or the config file's `advertiseHost`, e.g. to
+  // a Tailscale/VPN hostname or reverse-proxy domain the user actually
+  // reaches this machine through.
+  console.log(`Listening on http://${advertiseHost}:${server.port}`);
 
   if (requestedHost === "0.0.0.0" || requestedHost === "::") {
     const lan = lanAddresses();

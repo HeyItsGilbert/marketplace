@@ -25,6 +25,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   the URL, listing every session as a link with its live status; the page
   header shows the current session's label so concurrent tabs on
   different interviews are distinguishable.
+- An optional config file (`$XDG_CONFIG_HOME/grill-ui/config.json`, or
+  `GRILL_UI_CONFIG_PATH`) for a user who always wants a non-default port
+  or a non-loopback advertised hostname (a Tailscale/VPN name, a
+  reverse-proxy domain) without exporting `GRILL_UI_*` env vars on every
+  launch. Fields (`host`, `port`, `advertiseHost`) are each independently
+  optional; precedence per field is env var > config file > built-in
+  default. A new `GRILL_UI_ADVERTISE_HOST` env var (and matching
+  `advertiseHost` config field) overrides the hostname printed in the
+  startup log line / handed to the user, independent of the bind host.
 
 ### Changed
 

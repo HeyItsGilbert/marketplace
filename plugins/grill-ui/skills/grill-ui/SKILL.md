@@ -12,13 +12,13 @@ The server is a dumb relay — it never calls a model and never spawns a subagen
 
 ## Reuse the shared server, then create your session
 
-1. **Check whether a server is already running** before starting one: `GET http://127.0.0.1:<port>/sessions` (default port `4829`, or `$GRILL_UI_PORT` if you've overridden it) with a short timeout.
+1. **Check whether a server is already running** before starting one: `GET http://127.0.0.1:<port>/sessions` (default port `4829`, unless the user has overridden it — see **Persistent preferences** below) with a short timeout.
    - A JSON response means one is already up — reuse it, skip straight to step 2.
    - A connection failure means none is running yet — launch the bundled server as a long-running background process and keep it running for the rest of this and every other concurrent grill-ui interview, not just your own:
      ```
      bun run <skill-directory>/server/server.ts
      ```
-     Start it however your harness runs a persistent background command (a named service, `run_in_background`, `nohup … &` with its PID captured, etc.). Wait for its startup log line, `Listening on http://127.0.0.1:<port>`, before continuing; that confirms it's ready and tells you the bound port.
+     Start it however your harness runs a persistent background command (a named service, `run_in_background`, `nohup … &` with its PID captured, etc.). Wait for its startup log line, `Listening on http://<host>:<port>`, before continuing; that confirms it's ready and tells you the actual bound port (and advertised host — see **Persistent preferences** below) to use for the rest of this flow.
 2. **Create (or re-attach to) your session**:
    ```sh
    curl -s -X POST http://127.0.0.1:<port>/sessions -H 'content-type: application/json' \
@@ -26,9 +26,38 @@ The server is a dumb relay — it never calls a model and never spawns a subagen
    ```
    Pass your own harness/conversation's session identifier as `id` if your harness exposes one — reusing the same `id` is idempotent (it returns the existing session instead of erroring or creating a duplicate), so posting this again later in the same conversation (after a long-poll retry loop, a crash, or just a later round) reattaches to the same session instead of minting a new, disconnected one. If your harness exposes no such identifier, generate one yourself (any short stable string) and hold onto it for the rest of the conversation; `id` is entirely optional — omit it and the server mints a random one — but then it's on you to remember the returned id yourself for reuse. The response is `{"id", "label", "url"}`, where `url` is `/s/<id>`.
 
-Combine the server's host:port with that `url` and give the result to the user **once**, as a plain link — do not open it yourself. The user opens it in their own browser and keeps it open side by side with the terminal; the page updates live as each new round arrives, so there's no second link to send for this interview. The page's header shows your session's `label`, and its root URL (`http://127.0.0.1:<port>/`) lists every session currently on the server — including other concurrent interviews from other conversations — so the user can navigate between them from one tab if they have several going at once.
+Combine the advertised host:port from the startup log line (not necessarily `127.0.0.1` — see **Persistent preferences** below) with that `url` and give the result to the user **once**, as a plain link — do not open it yourself. The user opens it in their own browser and keeps it open side by side with the terminal; the page updates live as each new round arrives, so there's no second link to send for this interview. The page's header shows your session's `label`, and its root URL (e.g. `http://127.0.0.1:<port>/`) lists every session currently on the server — including other concurrent interviews from other conversations — so the user can navigate between them from one tab if they have several going at once.
 
 By default the server only binds to loopback (`127.0.0.1`) — reachable from this machine alone. If the user wants to answer from another device on the same network (e.g. a phone or a second computer), start it with `GRILL_UI_HOST=0.0.0.0 bun run <skill-directory>/server/server.ts` instead; it then also logs a `http://<lan-ip>:<port>` line for each reachable network interface — hand the user whichever link matches how they want to answer. Only do this on a network the user trusts: the relay has no authentication beyond rejecting cross-origin requests, so anyone on that network could read or answer any open session while it's exposed.
+
+## Persistent preferences (optional)
+
+A user who always wants the same non-default port, or wants the startup
+link to advertise a hostname other than loopback (a Tailscale/VPN name, a
+reverse-proxy domain — anything that actually resolves back to this
+machine for them), can set it once instead of exporting `GRILL_UI_*` env
+vars on every launch. The server reads an optional JSON config file at
+startup — `$XDG_CONFIG_HOME/grill-ui/config.json` (or `~/.config/grill-ui/config.json`
+if `XDG_CONFIG_HOME` is unset), or wherever `GRILL_UI_CONFIG_PATH` points:
+
+```json
+{
+  "host": "127.0.0.1",
+  "port": 5173,
+  "advertiseHost": "my-box.ts.net"
+}
+```
+
+All three fields are optional and independent — set only the ones that
+differ from the default. Precedence per field is **env var > config file >
+built-in default**, so a one-off override (`GRILL_UI_PORT=4829 bun run
+server.ts`) never has to touch the file. This is a human-facing setting,
+not something you manage: don't create or edit this file yourself unless
+the user explicitly asks you to. What it does mean for you is that the
+port in the startup log line can differ from the `4829` default even
+though no `GRILL_UI_PORT` was set for this launch — always read the actual
+bound port from that line (`Listening on http://<host>:<port>`), never
+assume it.
 
 ## Work the tree in rounds
 
