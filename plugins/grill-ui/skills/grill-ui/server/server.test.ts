@@ -25,3 +25,30 @@ describe("port conflict retry", () => {
     }
   });
 });
+
+describe("round body validation", () => {
+  test("a malformed POST /rounds body (null, wrong shape, non-array questions, or empty array) is rejected with 400 instead of crashing or poisoning the pending round", async () => {
+    const server = startServer("127.0.0.1", 0);
+    try {
+      const base = `http://127.0.0.1:${server.port}`;
+      const post = (body: unknown) =>
+        fetch(`${base}/rounds`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+
+      for (const body of [null, "just a string", { questions: "not an array" }, { questions: [] }]) {
+        const res = await post(body);
+        expect(res.status).toBe(400);
+      }
+
+      // A valid body still works afterward — rejecting the bad ones left no
+      // partial state (e.g. a stuck `pendingRound`) behind.
+      const ok = await post({ questions: [{ id: "q1", header: "H", question: "Q?" }] });
+      expect(ok.status).toBe(200);
+    } finally {
+      server.stop(true);
+    }
+  });
+});

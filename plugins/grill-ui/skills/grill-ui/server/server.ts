@@ -42,6 +42,32 @@ function broadcast(msg: unknown) {
   }
 }
 
+// Narrows an unknown decoded JSON value to the `questions` array a round
+// POST must carry, without trusting a type assertion on attacker-controlled
+// input. Returns `null` for anything else — `null` itself, a non-object, a
+// missing `questions` key, a non-array value (even one that happens to
+// carry a numeric `.length`), or an empty array — so a malformed body can
+// never reach `pendingRound`/`history`.
+function parseRoundQuestions(value: unknown): Question[] | null {
+  if (typeof value !== "object" || value === null || !("questions" in value)) return null;
+  const { questions } = value;
+  if (!Array.isArray(questions) || questions.length === 0) return null;
+  // Narrowed to a non-empty array; individual question shapes are still
+  // only as trustworthy as the caller, same as every other field the
+  // browser/agent sends us — the server relays them, it doesn't execute them.
+  return questions as Question[];
+}
+
+// Same idea for a submitted answers map: every value must actually be a
+// string or string array before it's trusted into `history`/returned from
+// the long-poll, rather than assuming the WebSocket payload matches `Answers`.
+function isAnswers(value: unknown): value is Answers {
+  if (typeof value !== "object" || value === null) return false;
+  return Object.values(value).every(
+    (v) => typeof v === "string" || (Array.isArray(v) && v.every((x) => typeof x === "string")),
+  );
+}
+
 function publicFile(name: string) {
   return new URL(`./public/${name}`, import.meta.url);
 }
@@ -65,16 +91,17 @@ async function fetch(req: Request, srv: { upgrade: (req: Request) => boolean }) 
     if (pendingRound) {
       return Response.json({ error: "A round is already pending" }, { status: 409 });
     }
-    let body: { questions?: Question[] };
+    let parsed: unknown;
     try {
-      body = (await req.json()) as { questions?: Question[] };
+      parsed = await req.json();
     } catch {
       return Response.json({ error: "invalid JSON body" }, { status: 400 });
     }
-    if (!body.questions || body.questions.length === 0) {
+    const questions = parseRoundQuestions(parsed);
+    if (!questions) {
       return Response.json({ error: "questions required" }, { status: 400 });
     }
-    const round: Round = { id: crypto.randomUUID(), questions: body.questions };
+    const round: Round = { id: crypto.randomUUID(), questions };
     pendingRound = round;
     broadcast({ type: "round", roundId: round.id, questions: round.questions });
     return Response.json({ roundId: round.id });
@@ -144,21 +171,23 @@ const websocket = {
     sockets.delete(ws);
   },
   message(_ws: WebSocket, raw: string | Buffer) {
-    let msg: { type?: string; roundId?: string; answers?: Answers };
+    let parsed: unknown;
     try {
-      msg = JSON.parse(String(raw));
+      parsed = JSON.parse(String(raw));
     } catch {
       return;
     }
-    if (msg.type === "submit" && pendingRound && msg.roundId === pendingRound.id) {
-      const answers: Answers = msg.answers ?? {};
-      const finished = pendingRound;
-      pendingRound = null;
-      history.push({ round: finished, answers });
-      const waiters = pendingWaiters;
-      pendingWaiters = [];
-      for (const resolve of waiters) resolve(answers);
-    }
+    if (typeof parsed !== "object" || parsed === null || !("type" in parsed) || !("roundId" in parsed)) return;
+    const { type, roundId } = parsed;
+    if (type !== "submit" || typeof roundId !== "string" || !pendingRound || roundId !== pendingRound.id) return;
+    const rawAnswers = "answers" in parsed ? parsed.answers : undefined;
+    const answers: Answers = isAnswers(rawAnswers) ? rawAnswers : {};
+    const finished = pendingRound;
+    pendingRound = null;
+    history.push({ round: finished, answers });
+    const waiters = pendingWaiters;
+    pendingWaiters = [];
+    for (const resolve of waiters) resolve(answers);
   },
 };
 

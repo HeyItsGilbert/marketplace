@@ -82,6 +82,11 @@ function renderQuestion() {
   if (hasOptions) {
     els.free.classList.add("hidden");
     els.customToggle.classList.remove("hidden");
+    // Exposes the option list to assistive tech as a native-equivalent
+    // radio/checkbox group instead of a wall of unlabeled, unfocusable
+    // divs — each option row below sets the matching role/aria-checked.
+    els.options.setAttribute("role", q.multi ? "group" : "radiogroup");
+    els.options.setAttribute("aria-labelledby", "q-text");
 
     if (state.highlighted == null || state.highlighted >= q.options.length) {
       state.highlighted =
@@ -102,8 +107,11 @@ function renderQuestion() {
     });
 
     updateDetailPanel();
+    focusHighlightedOption();
   } else {
     els.options.innerHTML = "";
+    els.options.removeAttribute("role");
+    els.options.removeAttribute("aria-labelledby");
     els.customToggle.classList.add("hidden");
     els.free.classList.remove("hidden");
     els.freeInput.value = typeof existingAnswer === "string" ? existingAnswer : "";
@@ -120,12 +128,19 @@ function buildOptionRow(q, opt, i, existingAnswer) {
   const row = document.createElement("div");
   row.className = "option";
   row.dataset.index = String(i);
+  // Native-equivalent role/keyboard-focus semantics (roving tabindex: only
+  // the highlighted option is ever in the Tab order) so the interview is
+  // operable and legible to assistive tech, not just the mouse/global
+  // keydown shortcuts below.
+  row.setAttribute("role", q.multi ? "checkbox" : "radio");
+  row.tabIndex = i === state.highlighted ? 0 : -1;
   if (i === state.highlighted) row.classList.add("highlighted");
 
   const isSelected = q.multi
     ? Array.isArray(existingAnswer) && existingAnswer.includes(opt.label)
     : existingAnswer === opt.label;
   if (isSelected) row.classList.add("selected");
+  row.setAttribute("aria-checked", String(isSelected));
 
   const key = document.createElement("div");
   key.className = q.multi ? "option-key checkbox" : "option-key radio";
@@ -165,6 +180,15 @@ function buildOptionRow(q, opt, i, existingAnswer) {
     if (q.multi) toggleHighlighted();
     else selectHighlighted();
   });
+  // Keeps `state.highlighted`/the detail panel in sync when a screen
+  // reader or keyboard user Tabs onto this row directly, not just when
+  // the global arrow-key handler below moves the roving tabindex here.
+  row.addEventListener("focus", () => {
+    if (state.highlighted === i) return;
+    state.highlighted = i;
+    updateHighlightClasses();
+    updateDetailPanel();
+  });
 
   return row;
 }
@@ -180,10 +204,27 @@ function renderProgress() {
   });
 }
 
+// Iterates by each row's own `data-index` (its option index) rather than
+// its position among `els.options`'s DOM children — a multi-select
+// question prepends a non-option hint div, which would otherwise shift
+// every subsequent row's effective index by one and highlight/focus the
+// wrong option.
 function updateHighlightClasses() {
-  [...els.options.children].forEach((row, i) => {
-    row.classList.toggle("highlighted", i === state.highlighted);
-  });
+  for (const row of els.options.children) {
+    if (row.dataset.index === undefined) continue;
+    const isHighlighted = Number(row.dataset.index) === state.highlighted;
+    row.classList.toggle("highlighted", isHighlighted);
+    row.tabIndex = isHighlighted ? 0 : -1;
+  }
+}
+
+function focusHighlightedOption() {
+  for (const row of els.options.children) {
+    if (row.dataset.index !== undefined && Number(row.dataset.index) === state.highlighted) {
+      row.focus();
+      return;
+    }
+  }
 }
 
 function updateDetailPanel() {
@@ -364,6 +405,7 @@ function moveHighlight(delta) {
   state.highlighted = ((state.highlighted ?? 0) + delta + count) % count;
   updateHighlightClasses();
   updateDetailPanel();
+  focusHighlightedOption();
 }
 
 function selectByNumber(i) {

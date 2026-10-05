@@ -144,6 +144,89 @@ describe("multi-select question as the final question in a round", () => {
   });
 });
 
+describe("option accessibility semantics", () => {
+  test("single-select options expose radiogroup/radio roles, aria-checked, and a roving tabindex", () => {
+    const { window } = mountApp();
+    const ws = FakeWebSocket.instances[0];
+    ws.emit("message", {
+      type: "round",
+      roundId: "r-a11y-1",
+      questions: [
+        {
+          id: "storage",
+          header: "Storage",
+          question: "Which?",
+          options: [
+            { label: "Postgres", description: "d" },
+            { label: "SQLite", description: "d" },
+          ],
+          recommended: 0,
+        },
+      ],
+    });
+
+    const container = window.document.getElementById("q-options");
+    assert.equal(container.getAttribute("role"), "radiogroup");
+
+    const options = [...window.document.querySelectorAll(".option")];
+    assert.equal(options.length, 2);
+    for (const row of options) assert.equal(row.getAttribute("role"), "radio");
+
+    // Only the highlighted (recommended) option is in the Tab order; the
+    // rest are reachable via arrow keys, not Tab, per the roving-tabindex
+    // pattern — and it is also the element that actually holds DOM focus.
+    assert.equal(options[0].tabIndex, 0);
+    assert.equal(options[1].tabIndex, -1);
+    assert.equal(options[0].getAttribute("aria-checked"), "false");
+    assert.equal(window.document.activeElement, options[0]);
+
+    options[1].click();
+    window.document.getElementById("btn-next").click();
+    assert.equal(ws.sent.length, 1);
+    assert.equal(ws.sent[0].answers.storage, "SQLite");
+  });
+
+  test("arrow-key navigation moves the roving tabindex/focus to the real highlighted option, not an off-by-one DOM child (the multi-select hint occupies slot 0)", () => {
+    const { window } = mountApp();
+    const ws = FakeWebSocket.instances[0];
+    ws.emit("message", {
+      type: "round",
+      roundId: "r-a11y-2",
+      questions: [
+        {
+          id: "features",
+          header: "Features",
+          question: "Which ship in v1?",
+          multi: true,
+          options: [
+            { label: "Metrics", description: "d" },
+            { label: "Tracing", description: "d" },
+          ],
+        },
+      ],
+    });
+
+    const container = window.document.getElementById("q-options");
+    assert.equal(container.getAttribute("role"), "group");
+    assert.equal(container.children[0].className, "multi-hint", "hint is DOM child 0, ahead of the options");
+
+    window.document.dispatchEvent(new window.KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true }));
+
+    const options = [...window.document.querySelectorAll(".option")];
+    assert.equal(options[0].classList.contains("highlighted"), false);
+    assert.equal(options[1].classList.contains("highlighted"), true, "highlight landed on option 1, not the hint");
+    assert.equal(options[1].tabIndex, 0);
+    assert.equal(window.document.activeElement, options[1], "DOM focus followed the highlight, not the hint div");
+
+    window.document.dispatchEvent(new window.KeyboardEvent("keydown", { key: " ", bubbles: true }));
+    // The space toggle re-renders the option list from scratch, so the
+    // previously queried `options[1]` is now a detached stale node —
+    // re-query to read the current DOM's attributes.
+    const toggled = [...window.document.querySelectorAll(".option")][1];
+    assert.equal(toggled.getAttribute("aria-checked"), "true");
+  });
+});
+
 describe("single-select question", () => {
   test("picking an option auto-advances, and renders as a radio (not checkbox)", () => {
     const { window, ws } = mountApp();
