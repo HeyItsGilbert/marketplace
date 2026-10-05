@@ -1,0 +1,7 @@
+{
+  "name": "wayfinder-view",
+  "private": true,
+  "scripts": {
+    "test": "bun test skills/wayfinder-view/server/view-model.test.ts skills/wayfinder-view/server/server.test.ts"
+  }
+}
