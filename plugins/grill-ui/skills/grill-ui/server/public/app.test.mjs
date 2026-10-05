@@ -55,12 +55,17 @@ function mountApp() {
     // signal the reload-on-restart test needs.
     if (String(err.message).includes("navigation")) reloadAttempted = true;
   });
-  const dom = new JSDOM(html, { url: "http://127.0.0.1:4829/", runScripts: "outside-only", virtualConsole });
+  const dom = new JSDOM(html, {
+    url: "http://127.0.0.1:4829/s/test-session",
+    runScripts: "outside-only",
+    virtualConsole,
+  });
   const { window } = dom;
   window.WebSocket = FakeWebSocket;
   window.eval(appJs);
   const ws = FakeWebSocket.instances[0];
   assert.ok(ws, "app.js did not open a WebSocket on load");
+  assert.equal(ws.url, "ws://127.0.0.1:4829/s/test-session/ws", "WS connects scoped to the page's session id");
   return { window, ws, reloadAttempted: () => reloadAttempted };
 }
 
@@ -338,5 +343,58 @@ describe("server restart detection", () => {
 
     ws.emit("message", { type: "boot", bootId: "boot-2" });
     assert.equal(reloadAttempted(), true, "a different boot id means the server process restarted");
+  });
+});
+
+describe("session label", () => {
+  test("the boot message's label is shown in the top bar so concurrent tabs on different sessions are distinguishable", () => {
+    const { window, ws } = mountApp();
+    ws.emit("message", { type: "boot", bootId: "boot-1", label: "API redesign" });
+    assert.equal(window.document.getElementById("session-label").textContent, "API redesign");
+  });
+});
+
+describe("session picker", () => {
+  // A tab opened at `/` (no session id in the URL) never had anywhere to
+  // get an id from, so it can't open a session-scoped WebSocket at all —
+  // it fetches the session list over plain HTTP instead and renders it as
+  // a list of links, each navigating to that session's `/s/<id>` URL.
+  function mountPicker(sessions) {
+    FakeWebSocket.instances = [];
+    const dom = new JSDOM(html, { url: "http://127.0.0.1:4829/", runScripts: "outside-only" });
+    const { window } = dom;
+    window.WebSocket = FakeWebSocket;
+    window.fetch = async (url) => {
+      assert.equal(url, "/sessions");
+      return { json: async () => ({ sessions }) };
+    };
+    window.eval(appJs);
+    return { window };
+  }
+
+  test("no session id in the URL renders the picker instead of opening a WebSocket", async () => {
+    const { window } = mountPicker([
+      { id: "a", label: "API redesign", done: false, pending: true, rounds: 1 },
+      { id: "b", label: "Schema cleanup", done: true, pending: false, rounds: 3 },
+    ]);
+    // loadPicker() is async; let its promise settle before asserting.
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    assert.equal(FakeWebSocket.instances.length, 0, "no session id means no WebSocket to connect");
+    assert.equal(window.document.getElementById("screen-picker").classList.contains("hidden"), false);
+
+    const items = [...window.document.querySelectorAll(".picker-item")];
+    assert.equal(items.length, 2);
+    assert.equal(items[0].getAttribute("href"), "/s/a");
+    assert.equal(items[0].querySelector(".picker-item-label").textContent, "API redesign");
+    assert.equal(items[0].querySelector(".picker-item-status").textContent, "Waiting on your answer");
+    assert.equal(items[1].querySelector(".picker-item-status").textContent, "Done — 3 rounds");
+  });
+
+  test("an empty session list shows a hint instead of an empty list", async () => {
+    const { window } = mountPicker([]);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    assert.equal(window.document.querySelectorAll(".picker-item").length, 0);
+    assert.match(window.document.getElementById("picker-list").textContent, /No sessions yet/);
   });
 });

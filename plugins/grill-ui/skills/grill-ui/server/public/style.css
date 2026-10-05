@@ -39,8 +39,8 @@ body {
 #top-bar {
   grid-area: top;
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  gap: 0.75rem;
   padding: 0.75rem 1.5rem;
   border-bottom: 1px solid var(--border);
 }
@@ -51,9 +51,21 @@ body {
   color: var(--muted);
 }
 
+#session-label {
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+#session-label:not(:empty)::before {
+  content: "·";
+  color: var(--muted);
+  margin-right: 0.75rem;
+}
+
 #round-indicator {
   color: var(--muted);
   font-size: 0.85rem;
+  margin-left: auto;
 }
 
 #stage {
@@ -79,6 +91,45 @@ body {
   font-size: 1.25rem;
   text-align: center;
   animation: pulse 2s ease-in-out infinite;
+}
+
+.picker-hint {
+  color: var(--muted);
+  font-size: 1.05rem;
+  text-align: center;
+  margin: 0 0 1.5rem;
+}
+
+#picker-list {
+  list-style: none;
+  margin: 0 0 1.25rem;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.picker-item {
+  display: block;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  text-decoration: none;
+  color: var(--text);
+}
+
+.picker-item:hover {
+  border-color: var(--accent-dim);
+}
+
+.picker-item-label {
+  font-weight: 600;
+}
+
+.picker-item-status {
+  color: var(--muted);
+  font-size: 0.85rem;
+  margin-top: 0.2rem;
 }
 
 @keyframes pulse {
@@ -130,8 +181,9 @@ body {
 }
 
 #q-text {
-  font-size: 1.6rem;
-  line-height: 1.35;
+  font-size: 1.15rem;
+  font-weight: 500;
+  line-height: 1.5;
   margin: 0 0 1.5rem;
   white-space: pre-wrap;
 }

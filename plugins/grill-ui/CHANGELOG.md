@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- The server is now a single shared process instead of one per interview:
+  every interview gets its own session (its own pending round, history, and
+  done flag), reachable at its own `/s/<id>` browser URL and multiplexed
+  over one port via `POST /sessions` (optionally idempotent on a
+  caller-supplied `id`, e.g. the orchestrating agent's own harness session
+  id, so reconnecting later in the same conversation reattaches instead of
+  creating a duplicate). Running two interviews at once is now just two
+  browser tabs on the same server instead of hunting for a second free
+  port. The protocol's `/rounds`, `/rounds/:id/wait`, `/done`, and `/ws`
+  routes all moved under `/s/:id/...` accordingly (see `SKILL.md`); a new
+  `GET /sessions` lists every session on the server (id, label, done,
+  pending, round count) and doubles as the discovery probe an agent uses
+  to tell whether a server is already running before starting one. The
+  browser's `/` root is now a session picker when no `/s/<id>` is in the
+  URL, listing every session as a link with its live status; the page
+  header shows the current session's label so concurrent tabs on
+  different interviews are distinguishable.
+- The question text in the browser was sized like a heading (`1.6rem`,
+  bold-by-font-weight), which ate most of the viewport on a realistically
+  long, multi-sentence question. Resized to a readable body size
+  (`1.15rem`, explicit `font-weight: 500`) so the options and controls are
+  visible without scrolling even on a long question.
+
 ## [1.0.0] - 2026-10-04
 
 ### Added

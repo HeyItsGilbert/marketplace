@@ -4,7 +4,7 @@ A marketplace plugin that adds `/grill-ui`: a grilling-style decision interview 
 
 ## What it adds
 
-A bundled Bun server relays "rounds" (batches of questions) between the agent and a single persistent browser tab over a WebSocket. The agent posts a round, long-polls for the answer, and the tab updates live — no page reload between rounds, and a running sidebar shows every previously-answered round. Supports single-select, multi-select, and free-text-only questions, per-option rich previews, and full keyboard operation (`1`-`9`, arrows/`jk`, `Enter`, `Space`, `/`).
+A bundled Bun server relays "rounds" (batches of questions) between the agent and a persistent browser tab over a WebSocket, one tab per interview. The server is a single shared process — concurrent interviews each get their own session (`/s/<id>`), so running two design interviews at once is just two browser tabs on the same server instead of hunting for a second port. The agent posts a round, long-polls for the answer, and the tab updates live — no page reload between rounds, and a running sidebar shows every previously-answered round in that session. Supports single-select, multi-select, and free-text-only questions, per-option rich previews, and full keyboard operation (`1`-`9`, arrows/`jk`, `Enter`, `Space`, `/`).
 
 ## Installation
 
@@ -35,7 +35,7 @@ This is agent judgement, not a skill-system feature. Under omp specifically, the
 
 ## Protocol (for agent authors / maintainers)
 
-See `skills/grill-ui/SKILL.md` for the full agent-facing protocol (`POST /rounds`, long-polling `GET /rounds/:id/wait`, `POST /done`, the question JSON shape). The server is a dumb relay only: it never calls a model and never spawns a subagent. Research or subagent dispatch for a frontier question always happens upstream of posting a round.
+See `skills/grill-ui/SKILL.md` for the full agent-facing protocol (`POST /sessions`, `POST /s/:id/rounds`, long-polling `GET /s/:id/rounds/:roundId/wait`, `POST /s/:id/done`, the question JSON shape). The server is a dumb relay only: it never calls a model and never spawns a subagent. Research or subagent dispatch for a frontier question always happens upstream of posting a round.
 
 ## Development
 
