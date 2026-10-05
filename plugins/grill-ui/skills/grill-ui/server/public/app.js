@@ -84,7 +84,10 @@ function renderQuestion() {
     els.customToggle.classList.remove("hidden");
 
     if (state.highlighted == null || state.highlighted >= q.options.length) {
-      state.highlighted = q.recommended ?? 0;
+      state.highlighted =
+        Number.isInteger(q.recommended) && q.recommended >= 0 && q.recommended < q.options.length
+          ? q.recommended
+          : 0;
     }
 
     if (q.multi) {

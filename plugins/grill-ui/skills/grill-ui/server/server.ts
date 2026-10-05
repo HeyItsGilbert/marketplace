@@ -48,6 +48,10 @@ function publicFile(name: string) {
 
 async function fetch(req: Request, srv: { upgrade: (req: Request) => boolean }) {
   const url = new URL(req.url);
+  const origin = req.headers.get("origin");
+  if (origin !== null && origin !== url.origin) {
+    return new Response("Cross-origin requests are forbidden", { status: 403 });
+  }
 
   if (url.pathname === "/ws") {
     if (srv.upgrade(req)) return undefined as unknown as Response;

@@ -37,7 +37,7 @@ The **frontier** is every decision whose prerequisites are already settled — t
    ```sh
    curl -s --max-time 0 http://127.0.0.1:<port>/rounds/<roundId>/wait
    ```
-   Run this as its own `bash` call with `timeout: 0` so the session-level deadline doesn't cut off the wait. Its response is `{"answers": {...}}`, keyed by each question's `id`; a single-select or free-text answer is a string, a multi-select answer is an array of the selected labels.
+   Run this as its own `bash` call with `timeout: 0` so the session-level deadline doesn't cut off the wait. Its response is `{"answers": {...}}`, keyed by each question's `id`; an answer chosen from single-select options is a string, one chosen from multi-select options is an array, and any answer entered through a free-text or "answer in your own words" field is a string.
 
 Each round the user's answers reshape the tree — settled decisions push the frontier outward and unblock questions that depended on them. Recompute the frontier and post the next round. A question whose answer depends on another question still open in this round belongs to a _later_ round, not this one.
 
