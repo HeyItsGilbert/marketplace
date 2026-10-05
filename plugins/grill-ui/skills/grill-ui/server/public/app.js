@@ -1,5 +1,11 @@
+// The session this tab belongs to, read once from the URL — `/s/<id>` for
+// an actual interview, or no match at all on `/` for the session picker.
+// A page never switches between the two: picking a session from the list
+// navigates to its `/s/<id>` URL, which reloads into session mode.
+const sessionId = (location.pathname.match(/^\/s\/([^/]+)\/?$/) || [])[1] || null;
+
 const state = {
-  screen: "idle", // "idle" | "question" | "done"
+  screen: sessionId ? "idle" : "picker", // "picker" | "idle" | "question" | "done"
   round: null, // { roundId, questions }
   index: 0,
   answers: {}, // questionId -> string | string[]
@@ -9,6 +15,11 @@ const state = {
 };
 
 const els = {
+  sessionLabel: document.getElementById("session-label"),
+  historyAside: document.getElementById("history"),
+  screenPicker: document.getElementById("screen-picker"),
+  pickerList: document.getElementById("picker-list"),
+  pickerRefresh: document.getElementById("btn-picker-refresh"),
   idleMessage: document.getElementById("idle-message"),
   screenIdle: document.getElementById("screen-idle"),
   screenDone: document.getElementById("screen-done"),
@@ -49,9 +60,13 @@ function renderPreview(raw) {
 }
 
 function render() {
+  els.screenPicker.classList.toggle("hidden", state.screen !== "picker");
   els.screenIdle.classList.toggle("hidden", state.screen !== "idle");
   els.screenDone.classList.toggle("hidden", state.screen !== "done");
   els.screenQuestion.classList.toggle("hidden", state.screen !== "question");
+  // The "this session" sidebar only makes sense once a session is chosen —
+  // the picker has no single session's history to show.
+  els.historyAside.classList.toggle("hidden", state.screen === "picker");
 
   if (state.screen === "idle") {
     els.idleMessage.textContent =
@@ -506,11 +521,77 @@ document.addEventListener("keydown", (e) => {
   }
 });
 
+function renderPickerList(sessionList) {
+  els.pickerList.innerHTML = "";
+  if (sessionList.length === 0) {
+    const li = document.createElement("li");
+    li.className = "picker-hint";
+    li.textContent = "No sessions yet.";
+    els.pickerList.appendChild(li);
+    return;
+  }
+  sessionList.forEach((s) => {
+    const li = document.createElement("li");
+    const a = document.createElement("a");
+    a.className = "picker-item";
+    a.href = `/s/${s.id}`;
+
+    const label = document.createElement("div");
+    label.className = "picker-item-label";
+    label.textContent = s.label;
+
+    const status = document.createElement("div");
+    status.className = "picker-item-status";
+    const roundWord = `${s.rounds} round${s.rounds === 1 ? "" : "s"}`;
+    status.textContent = s.done ? `Done — ${roundWord}` : s.pending ? "Waiting on your answer" : `${roundWord} so far`;
+
+    a.appendChild(label);
+    a.appendChild(status);
+    li.appendChild(a);
+    els.pickerList.appendChild(li);
+  });
+}
+
+async function loadPicker() {
+  try {
+    const res = await fetch("/sessions");
+    const data = await res.json();
+    renderPickerList(Array.isArray(data.sessions) ? data.sessions : []);
+  } catch {
+    renderPickerList([]);
+  }
+}
+
 let ws;
 let knownBootId = null;
+
+// A WS close can mean a transient blip (server busy for a moment) or that
+// this session no longer exists at all — most commonly because the server
+// process restarted and lost its in-memory sessions, or this session's
+// record expired after finishing. Those need different responses: a blip
+// should just reconnect, but a gone session should send the tab back to
+// the picker instead of retrying an endpoint that will never succeed
+// again. The WebSocket close event itself doesn't expose which case this
+// is, so ask the server directly over plain HTTP.
+async function checkSessionThenReconnect() {
+  try {
+    const res = await fetch("/sessions");
+    const data = await res.json();
+    const stillExists = Array.isArray(data.sessions) && data.sessions.some((s) => s.id === sessionId);
+    if (!stillExists) {
+      location.href = "/";
+      return;
+    }
+  } catch {
+    // Server unreachable entirely (still down, or restarting) — fall
+    // through to a plain reconnect attempt, which will itself retry.
+  }
+  connect();
+}
+
 function connect() {
   const proto = location.protocol === "https:" ? "wss" : "ws";
-  ws = new WebSocket(`${proto}://${location.host}/ws`);
+  ws = new WebSocket(`${proto}://${location.host}/s/${sessionId}/ws`);
 
   ws.addEventListener("message", (event) => {
     const msg = JSON.parse(event.data);
@@ -523,6 +604,7 @@ function connect() {
         return;
       }
       knownBootId = msg.bootId;
+      els.sessionLabel.textContent = msg.label || "";
     } else if (msg.type === "round") {
       if (!state.round || state.round.roundId !== msg.roundId) {
         startRound(msg.roundId, msg.questions);
@@ -536,9 +618,15 @@ function connect() {
   });
 
   ws.addEventListener("close", () => {
-    setTimeout(connect, 1000);
+    setTimeout(checkSessionThenReconnect, 1000);
   });
 }
 
-connect();
+els.pickerRefresh.addEventListener("click", loadPicker);
+
+if (sessionId) {
+  connect();
+} else {
+  loadPicker();
+}
 render();

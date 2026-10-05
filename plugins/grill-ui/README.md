@@ -4,7 +4,7 @@ A marketplace plugin that adds `/grill-ui`: a grilling-style decision interview 
 
 ## What it adds
 
-A bundled Bun server relays "rounds" (batches of questions) between the agent and a single persistent browser tab over a WebSocket. The agent posts a round, long-polls for the answer, and the tab updates live — no page reload between rounds, and a running sidebar shows every previously-answered round. Supports single-select, multi-select, and free-text-only questions, per-option rich previews, and full keyboard operation (`1`-`9`, arrows/`jk`, `Enter`, `Space`, `/`).
+A bundled Bun server relays "rounds" (batches of questions) between the agent and a persistent browser tab over a WebSocket, one tab per interview. The server is a single shared process — concurrent interviews each get their own session (`/s/<id>`), so running two design interviews at once is just two browser tabs on the same server instead of hunting for a second port. It refuses to silently relocate to a fallback port if its expected one is already taken (so a second launch always finds the first instead of spawning an undiscoverable twin), and a finished session is pruned after a TTL (24h default, `GRILL_UI_SESSION_TTL_MS`) so a server left running for weeks doesn't accumulate sessions forever; a tab whose session disappears (pruned, or a server restart) returns itself to a session-picker screen instead of retrying forever. The agent posts a round, long-polls for the answer, and the tab updates live — no page reload between rounds, and a running sidebar shows every previously-answered round in that session. Supports single-select, multi-select, and free-text-only questions, per-option rich previews, and full keyboard operation (`1`-`9`, arrows/`jk`, `Enter`, `Space`, `/`).
 
 ## Installation
 
@@ -22,6 +22,25 @@ or, under Claude Code:
 
 **Prerequisite:** [Bun](https://bun.sh) on `PATH`. The server is a `.ts` file run directly with `bun run`.
 
+## Configuration
+
+Always want a non-default port, or want the link advertised in the
+startup log to use a hostname other than loopback (a Tailscale/VPN name,
+a reverse-proxy domain)? Drop a config file at
+`$XDG_CONFIG_HOME/grill-ui/config.json` (or `~/.config/grill-ui/config.json`):
+
+```json
+{
+  "host": "127.0.0.1",
+  "port": 5173,
+  "advertiseHost": "my-box.ts.net"
+}
+```
+
+All fields are optional. `GRILL_UI_HOST`/`GRILL_UI_PORT`/`GRILL_UI_ADVERTISE_HOST`
+env vars (and `GRILL_UI_CONFIG_PATH` to point at a different config file)
+override the matching field for a single launch without touching the file.
+
 ## Usage pattern: chat first, escalate to grill-ui
 
 `/grill-ui` is **user-invoked** (`disable-model-invocation: true`), deliberately — it doesn't auto-fire the moment a conversation looks like a design discussion. Two reasons:
@@ -35,7 +54,7 @@ This is agent judgement, not a skill-system feature. Under omp specifically, the
 
 ## Protocol (for agent authors / maintainers)
 
-See `skills/grill-ui/SKILL.md` for the full agent-facing protocol (`POST /rounds`, long-polling `GET /rounds/:id/wait`, `POST /done`, the question JSON shape). The server is a dumb relay only: it never calls a model and never spawns a subagent. Research or subagent dispatch for a frontier question always happens upstream of posting a round.
+See `skills/grill-ui/SKILL.md` for the full agent-facing protocol (`POST /sessions`, `POST /s/:id/rounds`, long-polling `GET /s/:id/rounds/:roundId/wait`, `POST /s/:id/done`, the question JSON shape). The server is a dumb relay only: it never calls a model and never spawns a subagent. Research or subagent dispatch for a frontier question always happens upstream of posting a round.
 
 ## Development
 

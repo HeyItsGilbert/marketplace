@@ -10,11 +10,18 @@
   <div id="app">
     <header id="top-bar">
       <span id="brand">grill-ui</span>
+      <span id="session-label"></span>
       <span id="round-indicator"></span>
     </header>
 
     <main id="stage">
-      <section id="screen-idle" class="screen">
+      <section id="screen-picker" class="screen hidden">
+        <p class="picker-hint">Pick a session, or ask the agent to start one.</p>
+        <ul id="picker-list"></ul>
+        <button id="btn-picker-refresh" type="button" class="link-button">Refresh</button>
+      </section>
+
+      <section id="screen-idle" class="screen hidden">
         <p class="idle-message" id="idle-message">Waiting for the first round&hellip;</p>
       </section>
 
