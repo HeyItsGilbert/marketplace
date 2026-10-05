@@ -7,30 +7,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-10-05
+
+### Added
+
+- `POST /sessions` creates a session — the agent's unit of one interview —
+  reachable at its own `/s/<id>` browser URL and `/s/<id>/ws` socket. The
+  caller may supply its own `id` (e.g. the orchestrating agent's harness
+  session id); reusing it is idempotent, returning the existing session
+  instead of erroring or duplicating it, so reconnecting later in the same
+  conversation (after a long-poll retry, a crash, or just a later round)
+  reattaches instead of creating a disconnected one.
+- `GET /sessions` lists every session on the server (id, label, done,
+  pending, round count). Doubles as the discovery probe an agent uses to
+  tell whether a server is already running before starting a new one.
+- The browser's `/` root is now a session picker when no `/s/<id>` is in
+  the URL, listing every session as a link with its live status; the page
+  header shows the current session's label so concurrent tabs on
+  different interviews are distinguishable.
+
 ### Changed
 
 - The server is now a single shared process instead of one per interview:
-  every interview gets its own session (its own pending round, history, and
-  done flag), reachable at its own `/s/<id>` browser URL and multiplexed
-  over one port via `POST /sessions` (optionally idempotent on a
-  caller-supplied `id`, e.g. the orchestrating agent's own harness session
-  id, so reconnecting later in the same conversation reattaches instead of
-  creating a duplicate). Running two interviews at once is now just two
-  browser tabs on the same server instead of hunting for a second free
-  port. The protocol's `/rounds`, `/rounds/:id/wait`, `/done`, and `/ws`
-  routes all moved under `/s/:id/...` accordingly (see `SKILL.md`); a new
-  `GET /sessions` lists every session on the server (id, label, done,
-  pending, round count) and doubles as the discovery probe an agent uses
-  to tell whether a server is already running before starting one. The
-  browser's `/` root is now a session picker when no `/s/<id>` is in the
-  URL, listing every session as a link with its live status; the page
-  header shows the current session's label so concurrent tabs on
-  different interviews are distinguishable.
+  every interview gets its own session (its own pending round, history,
+  and done flag), multiplexed over one port instead of each interview
+  needing its own process and port. Running two interviews at once is now
+  just two browser tabs on the same server.
 - The question text in the browser was sized like a heading (`1.6rem`,
   bold-by-font-weight), which ate most of the viewport on a realistically
   long, multi-sentence question. Resized to a readable body size
   (`1.15rem`, explicit `font-weight: 500`) so the options and controls are
   visible without scrolling even on a long question.
+
+### Removed
+
+- The top-level, unscoped `POST /rounds`, `GET /rounds/:id/wait`,
+  `POST /done`, and `/ws` routes — replaced by their session-scoped
+  equivalents under `/s/:id/...` (see `SKILL.md`). Breaking change to the
+  agent-facing protocol: an agent built against 1.x's unscoped routes
+  must switch to creating a session first.
 
 ## [1.0.0] - 2026-10-04
 
