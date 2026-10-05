@@ -17,6 +17,7 @@ custom skills.
 | `release-manager`         | `/release`        | Update CHANGELOG.md and bump project versions following Keep a Changelog and SemVer           |
 | `powershell-lsp`          | —                 | PowerShell language server for .ps1/.psm1/.psd1. Downloads PowerShellEditorServices on first launch. |
 | `static-site-tools`       | `/og-image-design`| Explicitly invoke to design Open Graph and social sharing images                             |
+| `grill-ui`                | `/grill-ui`       | Grilling-style interviews rendered as a local Typeform-style browser page via a bundled Bun server (requires Bun on `PATH`) |
 
 ## Installation
 
@@ -25,6 +26,15 @@ Add this marketplace inside Claude Code, then install the plugins you want:
 ```text
 /plugin marketplace add HeyItsGilbert/marketplace
 /plugin install pester-testing@my-plugins
+```
+
+omp reads the same repository (via its own catalog,
+`.omp-plugin/marketplace.json`, kept in sync with the Claude one — see
+[Repository Structure](#repository-structure)):
+
+```text
+/marketplace add HeyItsGilbert/marketplace
+/marketplace install grill-ui@my-plugins
 ```
 
 Browse and toggle plugins interactively with `/plugin`. Once installed, skills
@@ -43,7 +53,8 @@ see [the retirement record](docs/architecture-decisions-retirement.md).
 ## Repository Structure
 
 ```
-.claude-plugin/marketplace.json   # Marketplace manifest — indexes all plugins
+.claude-plugin/marketplace.json   # Claude Code catalog
+.omp-plugin/marketplace.json      # omp catalog
 plugins/
   <plugin-name>/
     .claude-plugin/plugin.json    # Plugin manifest — name, description, version
@@ -51,6 +62,15 @@ plugins/
       <skill-name>/
         SKILL.md                  # Skill definition — frontmatter + prompt
 ```
+
+omp prefers `.omp-plugin/marketplace.json` and falls back to
+`.claude-plugin/marketplace.json` only when the omp-specific file is absent —
+the two catalogs are read exclusively, never merged, so every plugin needs an
+entry in each file it should be installable from. Every current plugin works
+under both tools and is listed in both catalogs; the split exists for a
+future plugin that only works under one of them (e.g. one that depends on a
+tool only that harness provides), which would be registered only in that
+tool's catalog so the other tool's users never see an entry they can't use.
 
 ## Creating Your Own Plugin
 
@@ -67,5 +87,7 @@ plugins/
 2. Create `plugins/<your-plugin>/skills/<your-skill>/SKILL.md` with YAML
    frontmatter (`name`, `description`) and the skill prompt as the markdown
    body.
-3. Register it in `.claude-plugin/marketplace.json` by adding an entry to the
-   `plugins` array.
+3. Register it in `.claude-plugin/marketplace.json` (and, if it works under
+   omp too, `.omp-plugin/marketplace.json`) by adding an entry to the
+   `plugins` array. If the plugin only works under omp, register it in
+   `.omp-plugin/marketplace.json` alone.

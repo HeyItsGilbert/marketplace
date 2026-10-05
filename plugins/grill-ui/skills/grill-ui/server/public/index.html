@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>grill-ui</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <div id="app">
+    <header id="top-bar">
+      <span id="brand">grill-ui</span>
+      <span id="round-indicator"></span>
+    </header>
+
+    <main id="stage">
+      <section id="screen-idle" class="screen">
+        <p class="idle-message" id="idle-message">Waiting for the first round&hellip;</p>
+      </section>
+
+      <section id="screen-done" class="screen hidden">
+        <p>All settled &mdash; nothing left on the frontier.</p>
+        <p class="hint">You can close this tab.</p>
+      </section>
+
+      <section id="screen-question" class="screen hidden">
+        <div class="progress" id="q-progress"></div>
+        <div class="eyebrow" id="q-header"></div>
+        <h1 id="q-text"></h1>
+
+        <div id="q-options"></div>
+        <div id="q-detail" class="hidden"></div>
+
+        <div id="q-free" class="hidden">
+          <textarea id="q-free-input" placeholder="Type your answer&hellip; (Ctrl/Cmd+Enter to confirm)"></textarea>
+        </div>
+
+        <div id="q-custom" class="hidden">
+          <input id="q-custom-input" type="text" placeholder="Answer in your own words&hellip; (Enter to confirm)" />
+        </div>
+        <button id="q-custom-toggle" type="button" class="link-button">Answer in your own words</button>
+
+        <div id="q-controls">
+          <button id="btn-back" type="button">&larr; Back</button>
+          <button id="btn-next" type="button" disabled>Next &rarr;</button>
+        </div>
+
+        <div id="hotkeys">
+          <span><kbd>1-9</kbd> pick</span>
+          <span><kbd>&uarr;</kbd><kbd>&darr;</kbd> move</span>
+          <span><kbd>Enter</kbd> confirm</span>
+          <span><kbd>Space</kbd> toggle (multi)</span>
+          <span><kbd>&larr;</kbd> back</span>
+          <span><kbd>/</kbd> own words</span>
+        </div>
+      </section>
+    </main>
+
+    <aside id="history">
+      <h2>This session</h2>
+      <ol id="history-list"></ol>
+    </aside>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>

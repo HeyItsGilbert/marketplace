@@ -1,0 +1,5 @@
+{
+  "name": "grill-ui",
+  "description": "Adds a /grill-ui skill: interview the user through a local Typeform-style browser page (Bun server + live updates) instead of a wall of numbered text questions",
+  "version": "1.0.0"
+}
