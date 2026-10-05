@@ -1,0 +1,93 @@
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  background: #05060a;
+  overflow: hidden;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  color: #e7e9f0;
+}
+
+#sky {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  text-align: center;
+  background: #7a2e2e;
+  color: #ffe9e9;
+  font-size: 12px;
+  padding: 4px 0;
+  letter-spacing: 0.04em;
+}
+
+#hud {
+  position: fixed;
+  top: 34px;
+  left: 16px;
+  z-index: 10;
+  max-width: 340px;
+  pointer-events: none;
+}
+
+#bodyName {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+#bodyDesc {
+  font-size: 12px;
+  color: #a7acc0;
+  margin-top: 2px;
+}
+
+#legend {
+  margin-top: 10px;
+  font-size: 11px;
+  color: #a7acc0;
+  line-height: 1.6;
+}
+
+#switcher {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(20, 22, 34, 0.9);
+  border: 1px solid #3a3f58;
+  border-radius: 999px;
+  padding: 6px 10px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.5);
+}
+
+#switcher button {
+  background: transparent;
+  border: none;
+  color: #e7e9f0;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 2px 8px;
+}
+
+#switcher button:hover {
+  color: #ffd166;
+}
+
+#switcher .label {
+  font-size: 12px;
+  min-width: 220px;
+  text-align: center;
+}
