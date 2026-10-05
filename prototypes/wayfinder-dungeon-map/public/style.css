@@ -1,0 +1,136 @@
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  background: #e9dec0;
+  overflow: hidden;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  color: #3a2d18;
+}
+
+#floor {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  text-align: center;
+  padding: 3px 0;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  background: #3a2d18;
+  color: #e9dec0;
+  border-bottom: 1px solid #1f1709;
+}
+
+#hud {
+  position: fixed;
+  top: 28px;
+  left: 14px;
+  max-width: 320px;
+  pointer-events: none;
+}
+
+#mapTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: #3a2d18;
+}
+
+#mapDesc {
+  margin-top: 4px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #6b5636;
+  max-width: 300px;
+}
+
+#legend {
+  margin-top: 12px;
+  font-size: 10px;
+  color: #6b5636;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  align-items: center;
+}
+
+.legend-row { display: inline-flex; align-items: center; gap: 4px; }
+.legend-sep { width: 100%; height: 0; }
+
+.icon-sample, .ring-sample {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  background: #6b5636;
+}
+.ring-sample { border-radius: 3px; background: transparent; }
+.ring-sample.frontier { border: 2px solid #b33a2e; }
+.ring-sample.blocked { border: 2px dashed #6b4f9e; }
+.ring-sample.claimed { border: 2px solid #8a6a1e; background: rgba(240, 200, 105, 0.35); }
+.ring-sample.closed { border: 2px double #3a2d18; }
+
+#tooltip {
+  position: fixed;
+  z-index: 20;
+  max-width: 260px;
+  padding: 8px 10px;
+  background: #f3ead2;
+  border: 1px solid #3a2d18;
+  border-radius: 4px;
+  font-size: 11px;
+  pointer-events: none;
+  transition: opacity 0.1s ease;
+  color: #3a2d18;
+}
+#tooltip.hidden { opacity: 0; }
+
+#tooltipTitle { font-weight: 600; margin-bottom: 2px; }
+#tooltipMeta { color: #6b5636; margin-bottom: 4px; }
+#tooltipGist { color: #4a3b22; line-height: 1.4; margin-bottom: 4px; }
+#tooltipLink { color: #2d5a8a; pointer-events: auto; font-size: 10px; }
+
+#jumpBar {
+  position: fixed;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 6px;
+  background: #f3ead2;
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid #3a2d18;
+}
+
+#jumpBar button {
+  background: transparent;
+  border: 1px solid #6b5636;
+  color: #6b5636;
+  font-family: inherit;
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+#jumpBar button:hover { border-color: #3a2d18; color: #3a2d18; }
+
+#jumpBar button.active {
+  background: #d8c89a;
+  color: #3a2d18;
+  border-color: #3a2d18;
+}
+
+#jumpBar .arrow { font-weight: 700; }
+
+.hidden { display: none; }

@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Wayfinder dungeon map — PROTOTYPE</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <div class="banner">PROTOTYPE — throwaway, not production UI (ticket #60)</div>
+
+  <canvas id="floor"></canvas>
+
+  <div id="hud">
+    <div id="mapTitle">—</div>
+    <div id="mapDesc"></div>
+    <div id="legend">
+      <span class="legend-row"><span class="icon-sample research"></span> research</span>
+      <span class="legend-row"><span class="icon-sample prototype"></span> prototype</span>
+      <span class="legend-row"><span class="icon-sample grilling"></span> grilling</span>
+      <span class="legend-row"><span class="icon-sample task"></span> task</span>
+      <span class="legend-sep"></span>
+      <span class="legend-row"><span class="ring-sample frontier"></span> frontier</span>
+      <span class="legend-row"><span class="ring-sample blocked"></span> blocked</span>
+      <span class="legend-row"><span class="ring-sample claimed"></span> claimed</span>
+      <span class="legend-row"><span class="ring-sample closed"></span> closed</span>
+    </div>
+  </div>
+
+  <div id="tooltip" class="hidden">
+    <div id="tooltipTitle"></div>
+    <div id="tooltipMeta"></div>
+    <div id="tooltipGist"></div>
+    <a id="tooltipLink" href="#" target="_blank" rel="noopener">open issue ↗</a>
+  </div>
+
+  <div id="jumpBar"></div>
+
+  <script src="/app.js"></script>
+</body>
+</html>

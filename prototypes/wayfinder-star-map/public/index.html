@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Wayfinder star map — PROTOTYPE</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <div class="banner">PROTOTYPE — throwaway, not production UI</div>
+
+  <canvas id="sky"></canvas>
+
+  <div id="hud">
+    <div id="systemName">—</div>
+    <div id="systemDesc"></div>
+    <div id="legend">
+      <span class="dot sun"></span> sun = plugin (the task/map)
+      <span class="dot planet"></span> planet = its direct dependency
+      <span class="dot moon"></span> moon = a dependency's dependency
+    </div>
+  </div>
+
+  <div id="jumpBar"></div>
+
+  <script src="/app.js"></script>
+</body>
+</html>

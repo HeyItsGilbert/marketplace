@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Wayfinder scale prototype — readability at N planets</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <canvas id="sky"></canvas>
+
+    <div id="hud">
+      <h1>Readability at scale — wayfinder #61</h1>
+      <p class="sub">Drag the sliders. Scroll to zoom, drag to pan, double-click to reset view.</p>
+
+      <label>
+        Planet-tier tickets: <span id="planetCountLabel"></span>
+        <input id="planetCount" type="range" min="4" max="150" value="8" />
+      </label>
+
+
+      <label>
+        Layout mode:
+        <select id="layoutMode">
+          <option value="scatter" selected>Organic scatter (each planet its own ring)</option>
+          <option value="concentric">Concentric rings</option>
+          <option value="single">Single ring (original)</option>
+        </select>
+      </label>
+      <label>
+        Max moons per planet: <span id="moonCountLabel"></span>
+        <input id="moonCount" type="range" min="0" max="6" value="4" />
+      </label>
+
+      <details open>
+        <summary>Tuning (sizes &amp; spacing)</summary>
+
+        <label>
+          Sun base radius: <span id="sunBaseLabel"></span>
+          <input id="sunBase" type="range" min="5" max="40" step="1" value="20" />
+        </label>
+        <label>
+          Sun growth per &radic;(planets): <span id="sunGrowthLabel"></span>
+          <input id="sunGrowth" type="range" min="0" max="10" step="0.5" value="10" />
+        </label>
+        <label>
+          Planet base body radius: <span id="planetBaseLabel"></span>
+          <input id="planetBase" type="range" min="2" max="20" step="0.5" value="4" />
+        </label>
+        <label>
+          Planet body growth per moon: <span id="planetPerMoonLabel"></span>
+          <input id="planetPerMoon" type="range" min="0" max="3" step="0.1" value="3" />
+        </label>
+        <label>
+          Moon body radius: <span id="moonBodyLabel"></span>
+          <input id="moonBody" type="range" min="1" max="6" step="0.1" value="2" />
+        </label>
+        <label>
+          Moon-to-moon spacing: <span id="moonStepLabel"></span>
+          <input id="moonStep" type="range" min="0" max="20" step="1" value="1" />
+        </label>
+        <label>
+          Orbit-to-orbit spacing: <span id="orbitBufferLabel"></span>
+          <input id="orbitBuffer" type="range" min="0" max="60" step="1" value="0" />
+        </label>
+      </details>
+      <div id="stats"></div>
+    </div>
+
+    <canvas id="minimap"></canvas>
+
+    <script src="app.js"></script>
+  </body>
+</html>
