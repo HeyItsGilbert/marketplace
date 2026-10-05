@@ -4,10 +4,10 @@ html, body {
   margin: 0;
   width: 100%;
   height: 100%;
-  background: #140f0a;
+  background: #e9dec0;
   overflow: hidden;
   font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-  color: #ead9c0;
+  color: #3a2d18;
 }
 
 #floor {
@@ -26,9 +26,9 @@ html, body {
   padding: 3px 0;
   font-size: 11px;
   letter-spacing: 0.08em;
-  background: #3a1d0b;
-  color: #f4c77a;
-  border-bottom: 1px solid #5a3414;
+  background: #3a2d18;
+  color: #e9dec0;
+  border-bottom: 1px solid #1f1709;
 }
 
 #hud {
@@ -42,22 +42,21 @@ html, body {
 #mapTitle {
   font-size: 18px;
   font-weight: 600;
-  color: #f4c77a;
-  text-shadow: 0 0 8px rgba(244, 199, 122, 0.4);
+  color: #3a2d18;
 }
 
 #mapDesc {
   margin-top: 4px;
   font-size: 12px;
   line-height: 1.5;
-  color: #c9b494;
+  color: #6b5636;
   max-width: 300px;
 }
 
 #legend {
   margin-top: 12px;
   font-size: 10px;
-  color: #9c8a6e;
+  color: #6b5636;
   display: flex;
   flex-wrap: wrap;
   gap: 4px 12px;
@@ -74,30 +73,31 @@ html, body {
   border-radius: 2px;
   background: #6b5636;
 }
-.ring-sample { border-radius: 50%; background: transparent; }
-.ring-sample.frontier { border: 2px solid #ff7a3d; }
-.ring-sample.blocked { border: 2px dashed #7a5fbf; }
-.ring-sample.claimed { border: 2px solid #e8c84a; box-shadow: 0 0 4px #e8c84a; }
-.ring-sample.closed { border: 2px double #5fd1a0; }
+.ring-sample { border-radius: 3px; background: transparent; }
+.ring-sample.frontier { border: 2px solid #b33a2e; }
+.ring-sample.blocked { border: 2px dashed #6b4f9e; }
+.ring-sample.claimed { border: 2px solid #8a6a1e; background: rgba(240, 200, 105, 0.35); }
+.ring-sample.closed { border: 2px double #3a2d18; }
 
 #tooltip {
   position: fixed;
   z-index: 20;
   max-width: 260px;
   padding: 8px 10px;
-  background: rgba(20, 14, 9, 0.95);
-  border: 1px solid #5a3414;
+  background: #f3ead2;
+  border: 1px solid #3a2d18;
   border-radius: 4px;
   font-size: 11px;
   pointer-events: none;
   transition: opacity 0.1s ease;
+  color: #3a2d18;
 }
 #tooltip.hidden { opacity: 0; }
 
-#tooltipTitle { font-weight: 600; color: #f4c77a; margin-bottom: 2px; }
-#tooltipMeta { color: #9c8a6e; margin-bottom: 4px; }
-#tooltipGist { color: #c9b494; line-height: 1.4; margin-bottom: 4px; }
-#tooltipLink { color: #6ec6ff; pointer-events: auto; font-size: 10px; }
+#tooltipTitle { font-weight: 600; margin-bottom: 2px; }
+#tooltipMeta { color: #6b5636; margin-bottom: 4px; }
+#tooltipGist { color: #4a3b22; line-height: 1.4; margin-bottom: 4px; }
+#tooltipLink { color: #2d5a8a; pointer-events: auto; font-size: 10px; }
 
 #jumpBar {
   position: fixed;
@@ -106,16 +106,16 @@ html, body {
   transform: translateX(-50%);
   display: flex;
   gap: 6px;
-  background: rgba(20, 14, 9, 0.85);
+  background: #f3ead2;
   padding: 6px 8px;
   border-radius: 6px;
-  border: 1px solid #3a1d0b;
+  border: 1px solid #3a2d18;
 }
 
 #jumpBar button {
   background: transparent;
-  border: 1px solid #5a3414;
-  color: #c9b494;
+  border: 1px solid #6b5636;
+  color: #6b5636;
   font-family: inherit;
   font-size: 11px;
   padding: 4px 8px;
@@ -123,12 +123,12 @@ html, body {
   cursor: pointer;
 }
 
-#jumpBar button:hover { border-color: #f4c77a; color: #f4c77a; }
+#jumpBar button:hover { border-color: #3a2d18; color: #3a2d18; }
 
 #jumpBar button.active {
-  background: #3a1d0b;
-  color: #f4c77a;
-  border-color: #f4c77a;
+  background: #d8c89a;
+  color: #3a2d18;
+  border-color: #3a2d18;
 }
 
 #jumpBar .arrow { font-weight: 700; }
