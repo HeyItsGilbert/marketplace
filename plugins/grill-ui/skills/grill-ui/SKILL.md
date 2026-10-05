@@ -12,17 +12,17 @@ The server is a dumb relay — it never calls a model and never spawns a subagen
 
 ## Start the server once per session
 
-On the first round, launch the bundled server as a named background service and keep it running for the rest of the session — do not restart it per round:
+On the first round, launch the bundled server as a long-running background process and keep it running for the rest of the session — do not restart it per round:
 
 ```
 bun run <skill-directory>/server/server.ts
 ```
 
-Use the `bash` tool's service mode: a unique `name` (e.g. `grill-ui`) and `ready: { log: "Listening on http://127\\.0\\.0\\.1:\\d+" }`. Read the bound URL from that log line and give it to the user **once**, as a plain link — do not open it yourself. The user opens it in their own browser and keeps it open side by side with the terminal; the page updates live as each new round arrives, so there's no second link to send.
+Start it however your harness runs a persistent background command (a named service, `run_in_background`, `nohup … &` with its PID captured, etc.) — the server never requires any particular launch mechanism, only that it keeps running across the rest of the session instead of being started fresh per round. Wait for its startup log line, `Listening on http://127.0.0.1:<port>`, before posting the first round; that confirms it's ready and tells you the bound port. Read the URL from that line and give it to the user **once**, as a plain link — do not open it yourself. The user opens it in their own browser and keeps it open side by side with the terminal; the page updates live as each new round arrives, so there's no second link to send.
 
-If a `grill-ui` service is already running for this session (a later round), skip this step entirely and reuse it.
+If a `grill-ui` server is already running for this session (a later round), skip this step entirely and reuse it.
 
-By default the server only binds to loopback (`127.0.0.1`) — reachable from this machine alone. If the user wants to answer from another device on the same network (e.g. a phone or a second computer), start it with `GRILL_UI_HOST=0.0.0.0 bun run <skill-directory>/server/server.ts` instead; it then also logs a `http://<lan-ip>:<port>` line for each reachable network interface — hand the user whichever link matches how they want to answer. Only do this on a network the user trusts: the relay has no authentication, so anyone on that network could read or answer the open round while it's exposed.
+By default the server only binds to loopback (`127.0.0.1`) — reachable from this machine alone. If the user wants to answer from another device on the same network (e.g. a phone or a second computer), start it with `GRILL_UI_HOST=0.0.0.0 bun run <skill-directory>/server/server.ts` instead; it then also logs a `http://<lan-ip>:<port>` line for each reachable network interface — hand the user whichever link matches how they want to answer. Only do this on a network the user trusts: the relay has no authentication beyond rejecting cross-origin requests, so anyone on that network could read or answer the open round while it's exposed.
 
 ## Work the tree in rounds
 
@@ -33,11 +33,11 @@ The **frontier** is every decision whose prerequisites are already settled — t
    ```sh
    curl -s -X POST http://127.0.0.1:<port>/rounds -H 'content-type: application/json' -d @round.json
    ```
-3. Take the returned `roundId` and long-poll for the answer — this call does not return until the user finishes the round in the browser, so let it hold with no timeout:
+3. Take the returned `roundId` and long-poll for the answer — this call does not return until the user finishes the round in the browser:
    ```sh
    curl -s --max-time 0 http://127.0.0.1:<port>/rounds/<roundId>/wait
    ```
-   Run this as its own `bash` call with `timeout: 0` so the session-level deadline doesn't cut off the wait. Its response is `{"answers": {...}}`, keyed by each question's `id`; an answer chosen from single-select options is a string, one chosen from multi-select options is an array, and any answer entered through a free-text or "answer in your own words" field is a string.
+   If your harness lets a single command run with no deadline (e.g. omp's `bash` tool with `timeout: 0`), run this as its own call that way and let it hold indefinitely. If your harness caps how long a single command can run, use that cap as curl's `--max-time` instead and **retry the same `GET` on a timeout** — the round stays pending on the server until it's actually answered, so re-polling picks up exactly where it left off and never misses or duplicates an answer. Either way, its response is `{"answers": {...}}`, keyed by each question's `id`; an answer chosen from single-select options is a string, one chosen from multi-select options is an array, and any answer entered through a free-text or "answer in your own words" field is a string.
 
 Each round the user's answers reshape the tree — settled decisions push the frontier outward and unblock questions that depended on them. Recompute the frontier and post the next round. A question whose answer depends on another question still open in this round belongs to a _later_ round, not this one.
 
@@ -67,4 +67,4 @@ The session is done when the frontier is empty: every branch of the design tree 
 curl -s -X POST http://127.0.0.1:<port>/done
 ```
 
-This makes the browser show a completion screen; posting a round after this is rejected. Then stop the `grill-ui` service. Do not act on the gathered answers until the user confirms you have reached a shared understanding.
+This makes the browser show a completion screen; posting a round after this is rejected. Then stop the background server process however your harness terminates one. Do not act on the gathered answers until the user confirms you have reached a shared understanding.

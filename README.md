@@ -17,11 +17,7 @@ custom skills.
 | `release-manager`         | `/release`        | Update CHANGELOG.md and bump project versions following Keep a Changelog and SemVer           |
 | `powershell-lsp`          | —                 | PowerShell language server for .ps1/.psm1/.psd1. Downloads PowerShellEditorServices on first launch. |
 | `static-site-tools`       | `/og-image-design`| Explicitly invoke to design Open Graph and social sharing images                             |
-
-The `grill-ui` plugin (`/grill-ui` — grilling-style interviews rendered as a
-local Typeform-style browser page, driven by a bundled Bun server) is **not**
-in this table because it's omp only and lives in a separate catalog; see
-[Repository Structure](#repository-structure).
+| `grill-ui`                | `/grill-ui`       | Grilling-style interviews rendered as a local Typeform-style browser page via a bundled Bun server (requires Bun on `PATH`) |
 
 ## Installation
 
@@ -32,9 +28,9 @@ Add this marketplace inside Claude Code, then install the plugins you want:
 /plugin install pester-testing@my-plugins
 ```
 
-omp reads the same repository but prefers its own catalog
-(`.omp-plugin/marketplace.json`) over the Claude one when both exist, so an
-omp user adding this marketplace sees every plugin above plus `grill-ui`:
+omp reads the same repository (via its own catalog,
+`.omp-plugin/marketplace.json`, kept in sync with the Claude one — see
+[Repository Structure](#repository-structure)):
 
 ```text
 /marketplace add HeyItsGilbert/marketplace
@@ -57,8 +53,8 @@ see [the retirement record](docs/architecture-decisions-retirement.md).
 ## Repository Structure
 
 ```
-.claude-plugin/marketplace.json   # Claude Code catalog — every plugin except grill-ui
-.omp-plugin/marketplace.json      # omp catalog — every plugin, including the omp-only grill-ui
+.claude-plugin/marketplace.json   # Claude Code catalog
+.omp-plugin/marketplace.json      # omp catalog
 plugins/
   <plugin-name>/
     .claude-plugin/plugin.json    # Plugin manifest — name, description, version
@@ -69,11 +65,12 @@ plugins/
 
 omp prefers `.omp-plugin/marketplace.json` and falls back to
 `.claude-plugin/marketplace.json` only when the omp-specific file is absent —
-the two catalogs are read exclusively, never merged. A plugin that only works
-under omp (like `grill-ui`, which launches a local Bun server via omp's
-`bash` service conventions) belongs in `.omp-plugin/marketplace.json` alone,
-so Claude Code users never see an entry they can't use. A plugin that works
-under both stays listed in both files.
+the two catalogs are read exclusively, never merged, so every plugin needs an
+entry in each file it should be installable from. Every current plugin works
+under both tools and is listed in both catalogs; the split exists for a
+future plugin that only works under one of them (e.g. one that depends on a
+tool only that harness provides), which would be registered only in that
+tool's catalog so the other tool's users never see an entry they can't use.
 
 ## Creating Your Own Plugin
 

@@ -38,6 +38,11 @@
       "name": "powershell-lsp",
       "source": "./plugins/powershell-lsp",
       "description": "PowerShell language server (PowerShellEditorServices) for .ps1, .psm1, and .psd1. Downloads PSES on first launch; no manual install."
+    },
+    {
+      "name": "grill-ui",
+      "source": "./plugins/grill-ui",
+      "description": "Adds a /grill-ui skill: grilling-style interviews rendered through a local Typeform-style browser page instead of a text wall (requires Bun)"
     }
   ]
 }

@@ -26,8 +26,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Research/subagent dispatch for a frontier question always happens
   upstream of posting a round, matching the original grilling skill's
   guidance — the server has no model access and cannot drive that itself.
-  omp-only — it depends on omp's `bash` service/long-poll conventions and
-  Bun. Named distinctly from upstream mattpocock/skills' `grilling` so both
+  Works under any coding-agent harness that can run a persistent background
+  process and issue plain HTTP requests, including a bounded-timeout retry
+  path for harnesses that cap how long a single command may run.
+  Named distinctly from upstream mattpocock/skills' `grilling` so both
   can be installed without a trigger-phrase collision. Binds to loopback
   only by default; `GRILL_UI_HOST=0.0.0.0` opts into also serving the local
   network (e.g. to answer from a phone), logging each reachable LAN
@@ -39,6 +41,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   DOM client via jsdom — jsdom's `vm` usage isn't yet Bun-compatible, so
   only the client tests need Node) covering every fix below plus the core
   round/answer flow. Run both with `npm test` from `plugins/grill-ui/`.
+
+### Changed
+
+- No longer omp-exclusive: the agent-facing protocol in `SKILL.md` was
+  rewritten off omp-specific `bash`-tool jargon (named services, `ready`
+  log-regex, `proc://` shutdown) onto harness-neutral instructions (start a
+  background process however your harness does that; long-poll with no
+  deadline if your harness allows it, otherwise poll with a bounded
+  `--max-time` and retry on timeout — the round stays pending server-side
+  either way, so retrying never loses or duplicates an answer). Bun is still
+  the only hard runtime requirement. Registered in
+  `.claude-plugin/marketplace.json` alongside `.omp-plugin/marketplace.json`
+  accordingly.
+- The relay now rejects cross-origin requests (any `Origin` header that
+  doesn't match the server's own origin gets a 403), closing a CSRF-style
+  gap where another open tab could otherwise read or answer the pending
+  round on an unauthenticated localhost server.
 
 ### Fixed
 

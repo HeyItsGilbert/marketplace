@@ -1,6 +1,6 @@
 # grill-ui
 
-A marketplace plugin that adds `/grill-ui`: a grilling-style decision interview rendered as a local, Typeform-style browser page instead of a wall of numbered chat text. omp only — see [Why omp only](#why-omp-only).
+A marketplace plugin that adds `/grill-ui`: a grilling-style decision interview rendered as a local, Typeform-style browser page instead of a wall of numbered chat text. Works under any coding-agent harness that can run a persistent background process and issue plain HTTP requests — see [Requirements](#requirements).
 
 ## What it adds
 
@@ -11,6 +11,13 @@ A bundled Bun server relays "rounds" (batches of questions) between the agent an
 ```text
 /marketplace add HeyItsGilbert/marketplace
 /marketplace install grill-ui@my-plugins
+```
+
+or, under Claude Code:
+
+```text
+/plugin marketplace add HeyItsGilbert/marketplace
+/plugin install grill-ui@my-plugins
 ```
 
 **Prerequisite:** [Bun](https://bun.sh) on `PATH`. The server is a `.ts` file run directly with `bun run`.
@@ -24,7 +31,7 @@ A bundled Bun server relays "rounds" (batches of questions) between the agent an
 
 So the intended flow is: start a decision interview in plain chat (numbered questions, or the `ask` tool), same as always. If, after the first round, it's clear the frontier is going to need several more rounds, the agent should proactively offer to switch to `grill-ui` for the rest rather than deciding upfront — you approve or decline each time. A short interview just stays in chat and never needs grill-ui at all.
 
-This is agent judgement, not a skill-system feature — omp's skill frontmatter has no declarative "invoke conditionally on expected length" knob (confirmed against `skills.customDirectories`/`disableModelInvocation`/`hide`: none of them support this). The skill stays discoverable (its name and one-line description are always visible in the system prompt's skill list, per omp's skill-metadata exposure) without being presumptuous about jumping to a browser-based flow for a two-question decision.
+This is agent judgement, not a skill-system feature. Under omp specifically, the skill frontmatter has no declarative "invoke conditionally on expected length" knob (confirmed against `skills.customDirectories`/`disableModelInvocation`/`hide`: none of them support this), and the skill stays discoverable even while user-invoked — its name and one-line description are always visible in the system prompt's skill list, per omp's skill-metadata exposure. Other harnesses' handling of a `disable-model-invocation` skill's discoverability may differ; the escalate-mid-session judgement call applies regardless.
 
 ## Protocol (for agent authors / maintainers)
 
@@ -40,6 +47,7 @@ npm test
 
 Two test suites: `bun test` for server-side logic (`server.test.ts`, real `Bun.serve` binding) and `node --test` for the DOM client (`skills/grill-ui/server/public/app.test.mjs`, via jsdom). Both run under `npm test`. The client tests require Node specifically — jsdom's script execution depends on Node's `vm` module, which Bun does not yet implement compatibly (confirmed independently: both `window.eval` and real `<script>` execution throw inside jsdom under Bun).
 
-## Why omp only
+## Requirements
 
-`grill-ui` depends on omp's `bash` tool service/long-poll conventions (named background services, `ready` log-regex gating, `timeout: 0` long-polls) and on Bun. Claude Code provides neither, so it's registered only in `.omp-plugin/marketplace.json`, never in `.claude-plugin/marketplace.json` — see the root [README](../../README.md#repository-structure) for the dual-catalog split.
+- [Bun](https://bun.sh) on `PATH` — the server is a `.ts` file run directly with `bun run`.
+- A harness that can run a long-lived background process (a named service, `run_in_background`, `nohup … &`, or equivalent) and issue plain HTTP requests (`curl` or similar) from its shell/tool access. True of omp and Claude Code's own Bash tool, and most agentic coding harnesses generically — see `skills/grill-ui/SKILL.md` for how the agent-facing instructions stay harness-neutral (e.g. falling back to a bounded `--max-time` + retry loop for the long-poll on a harness that caps command duration, instead of assuming an unbounded wait).
