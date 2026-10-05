@@ -36,6 +36,10 @@ type Session = {
   pendingWaiters: Array<(answers: Answers) => void>;
   history: Array<{ round: Round; answers: Answers }>;
   sessionDone: boolean;
+  // Set when `sessionDone` flips true — the clock `pruneExpiredSessions`
+  // measures a finished session's age against. `null` for a
+  // still-active session, which pruning never touches regardless of age.
+  doneAt: number | null;
   sockets: Set<WebSocket>;
 };
 
@@ -105,7 +109,34 @@ function publicFile(name: string) {
   return new URL(`./public/${name}`, import.meta.url);
 }
 
-export function startServer(host: string, startPort: number, attemptsLeft = 20) {
+const DEFAULT_SESSION_TTL_MS = 24 * 60 * 60 * 1000;
+
+// Exported for direct unit testing — a pure sweep over `sessions`,
+// deleting any session that finished more than `ttlMs` ago. A still
+// pending/open session is never touched by this regardless of age; only
+// `POST /s/:id/done` starts a session's clock. This is what keeps a
+// long-lived shared server's memory (and `GET /sessions`/the picker list)
+// from growing without bound across weeks of use — a finished session's
+// Q&A history is retained only long enough to be worth re-reading, not
+// forever. Any socket still attached to a swept session is closed so an
+// open tab discovers it's gone on its very next reconnect check instead
+// of silently retrying an id that no longer exists.
+export function pruneExpiredSessions(sessions: Map<string, Session>, now: number, ttlMs: number): void {
+  for (const [id, session] of sessions) {
+    if (!session.sessionDone || session.doneAt === null) continue;
+    if (now - session.doneAt < ttlMs) continue;
+    for (const ws of session.sockets) {
+      try {
+        ws.close();
+      } catch {
+        // already closed
+      }
+    }
+    sessions.delete(id);
+  }
+}
+
+export function startServer(host: string, startPort: number, attemptsLeft = 20): Bun.Server {
   // Scoped to this call instead of module-level: each `startServer()`
   // invocation gets its own session table and boot id, isolated from any
   // other server built in the same process. In production there's only
@@ -121,6 +152,10 @@ export function startServer(host: string, startPort: number, attemptsLeft = 20) 
   // to reload and pick up the current app.js/style.css instead of silently
   // continuing to run a stale version against the new server.
   const bootId = crypto.randomUUID();
+  const sessionTtlMs = (() => {
+    const raw = Number(process.env.GRILL_UI_SESSION_TTL_MS);
+    return Number.isFinite(raw) && raw >= 0 ? raw : DEFAULT_SESSION_TTL_MS;
+  })();
 
   async function fetch(req: Request, srv: { upgrade: (req: Request, opts?: { data: SocketData }) => boolean }) {
     const url = new URL(req.url);
@@ -128,6 +163,7 @@ export function startServer(host: string, startPort: number, attemptsLeft = 20) 
     if (origin !== null && origin !== url.origin) {
       return new Response("Cross-origin requests are forbidden", { status: 403 });
     }
+    pruneExpiredSessions(sessions, Date.now(), sessionTtlMs);
 
     const wsMatch = url.pathname.match(/^\/s\/([^/]+)\/ws$/);
     if (wsMatch) {
@@ -177,6 +213,7 @@ export function startServer(host: string, startPort: number, attemptsLeft = 20) 
         pendingWaiters: [],
         history: [],
         sessionDone: false,
+        doneAt: null,
         sockets: new Set(),
       };
       sessions.set(id, session);
@@ -229,6 +266,7 @@ export function startServer(host: string, startPort: number, attemptsLeft = 20) 
       const session = sessions.get(doneMatch[1]);
       if (!session) return Response.json({ error: "unknown session" }, { status: 404 });
       session.sessionDone = true;
+      session.doneAt = Date.now();
       broadcast(session, { type: "done" });
       return Response.json({ ok: true });
     }
@@ -412,7 +450,28 @@ if (import.meta.main) {
   const configPath = process.env.GRILL_UI_CONFIG_PATH || defaultConfigPath();
   const fileConfig = loadFileConfig(configPath);
   const { host: requestedHost, port: requestedPort, advertiseHost } = resolveServerConfig(fileConfig, process.env);
-  const server = startServer(requestedHost, requestedPort);
+
+  let server: Bun.Server;
+  try {
+    // A single attempt, not `startServer`'s default retry-the-next-port
+    // fallback: this process is meant to be *the* shared grill-ui server
+    // for this machine, discoverable at a known port. Silently relocating
+    // to a fallback port on conflict would make a startup race's loser
+    // undiscoverable — another agent's discovery probe only checks the
+    // expected port, so it would never find this instance and would spin
+    // up yet another redundant server instead of reusing the winner.
+    // Failing loudly instead sends that second launcher back to its
+    // discovery probe, where the winner is now there to find.
+    server = startServer(requestedHost, requestedPort, 1);
+  } catch (err) {
+    console.error(
+      `grill-ui: could not bind ${requestedHost}:${requestedPort} (${err instanceof Error ? err.message : err})`,
+    );
+    console.error(
+      `Check whether a grill-ui server is already running there — GET http://${requestedHost}:${requestedPort}/sessions — and reuse it, or set GRILL_UI_PORT (or the config file's "port") to use a different one.`,
+    );
+    process.exit(1);
+  }
 
   // The `bash` tool's service readiness check matches this line via a log
   // regex ("Listening on"), independent of the host text — `advertiseHost`

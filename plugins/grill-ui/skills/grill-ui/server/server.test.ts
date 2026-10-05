@@ -7,7 +7,7 @@
 // the client tests in public/app.test.mjs route around via Node instead.
 
 import { describe, expect, test } from "bun:test";
-import { parseFileConfig, resolveServerConfig, startServer } from "./server.ts";
+import { parseFileConfig, pruneExpiredSessions, resolveServerConfig, startServer } from "./server.ts";
 
 describe("port conflict retry", () => {
   test("starting a server on an already-bound port lands on the next one instead of throwing", () => {
@@ -222,4 +222,158 @@ describe("config precedence: env var > config file > built-in default", () => {
       advertiseHost: "127.0.0.1",
     });
   });
+});
+describe("pruneExpiredSessions", () => {
+  test("only a done session past its TTL is removed; a recently-done or still-active session is untouched, and the expired session's sockets are closed", () => {
+    const now = 1_000_000;
+    let closedCount = 0;
+    const mockSocket = { close: () => { closedCount++; } } as unknown as WebSocket;
+
+    const sessions = new Map([
+      [
+        "expired-done",
+        {
+          id: "expired-done",
+          label: "a",
+          pendingRound: null,
+          pendingWaiters: [],
+          history: [],
+          sessionDone: true,
+          doneAt: now - 1000,
+          sockets: new Set([mockSocket]),
+        },
+      ],
+      [
+        "recent-done",
+        {
+          id: "recent-done",
+          label: "b",
+          pendingRound: null,
+          pendingWaiters: [],
+          history: [],
+          sessionDone: true,
+          doneAt: now - 10,
+          sockets: new Set(),
+        },
+      ],
+      [
+        "still-active",
+        {
+          id: "still-active",
+          label: "c",
+          pendingRound: null,
+          pendingWaiters: [],
+          history: [],
+          sessionDone: false,
+          doneAt: null,
+          sockets: new Set(),
+        },
+      ],
+    ]);
+
+    pruneExpiredSessions(sessions, now, 500);
+
+    expect(sessions.has("expired-done")).toBe(false);
+    expect(sessions.has("recent-done")).toBe(true);
+    expect(sessions.has("still-active")).toBe(true);
+    expect(closedCount).toBe(1);
+  });
+});
+
+describe("session expiry end to end", () => {
+  // TTL=0 makes "past the TTL" true the instant a session is marked done,
+  // without needing a real wall-clock wait between the `done` POST and the
+  // follow-up `GET /sessions` — two separate round trips over a real
+  // socket already take nonzero time, which is all a TTL of 0 requires.
+  test("a session finished more than GRILL_UI_SESSION_TTL_MS ago disappears from GET /sessions and later lookups 404 — a long-lived server's session table doesn't grow forever", async () => {
+    const previousTtl = process.env.GRILL_UI_SESSION_TTL_MS;
+    process.env.GRILL_UI_SESSION_TTL_MS = "0";
+    try {
+      const server = startServer("127.0.0.1", 0);
+      try {
+        const base = `http://127.0.0.1:${server.port}`;
+        const { id } = await (await fetch(`${base}/sessions`, { method: "POST" })).json();
+        await fetch(`${base}/s/${id}/done`, { method: "POST" });
+
+        // Any request triggers the sweep (it runs at the top of every
+        // request), not just a dedicated cleanup endpoint.
+        const afterDone = await (await fetch(`${base}/sessions`)).json();
+        expect(afterDone.sessions.some((s: { id: string }) => s.id === id)).toBe(false);
+
+        const roundAfterExpiry = await fetch(`${base}/s/${id}/rounds`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ questions: [{ id: "q1", header: "H", question: "Q?" }] }),
+        });
+        expect(roundAfterExpiry.status).toBe(404);
+      } finally {
+        server.stop(true);
+      }
+    } finally {
+      if (previousTtl === undefined) delete process.env.GRILL_UI_SESSION_TTL_MS;
+      else process.env.GRILL_UI_SESSION_TTL_MS = previousTtl;
+    }
+  });
+
+  test("a session that's still open (never marked done) is never pruned, even under a TTL of 0", async () => {
+    const previousTtl = process.env.GRILL_UI_SESSION_TTL_MS;
+    process.env.GRILL_UI_SESSION_TTL_MS = "0";
+    try {
+      const server = startServer("127.0.0.1", 0);
+      try {
+        const base = `http://127.0.0.1:${server.port}`;
+        const { id } = await (await fetch(`${base}/sessions`, { method: "POST" })).json();
+
+        const listed = await (await fetch(`${base}/sessions`)).json();
+        expect(listed.sessions.some((s: { id: string }) => s.id === id)).toBe(true);
+      } finally {
+        server.stop(true);
+      }
+    } finally {
+      if (previousTtl === undefined) delete process.env.GRILL_UI_SESSION_TTL_MS;
+      else process.env.GRILL_UI_SESSION_TTL_MS = previousTtl;
+    }
+  });
+});
+
+describe("fail-fast on port conflict (the real CLI entrypoint, not startServer directly)", () => {
+  test("a second `bun run server.ts` against an already-bound port exits non-zero with guidance instead of silently relocating to a fallback port", async () => {
+    // Grab a free port by briefly binding port 0, then reuse that number —
+    // startServer()'s own retry logic is intentionally not used here: this
+    // test is about the CLI entrypoint's choice not to use that retry, so
+    // it has to go through the real `bun run` process, not the exported
+    // function.
+    const probe = Bun.serve({ port: 0, fetch: () => new Response("ok") });
+    const port = probe.port;
+    probe.stop(true);
+
+    const serverScript = `${import.meta.dir}/server.ts`;
+    const env = { ...process.env, GRILL_UI_PORT: String(port), GRILL_UI_HOST: "127.0.0.1" };
+
+    const first = Bun.spawn(["bun", "run", serverScript], { env, stdout: "pipe", stderr: "pipe" });
+    try {
+      // Wait for the first process to actually report it's listening
+      // before racing the second against it.
+      const reader = first.stdout.getReader();
+      const decoder = new TextDecoder();
+      let output = "";
+      while (!output.includes("Listening on")) {
+        const { value, done } = await reader.read();
+        if (done) throw new Error("first server exited before printing a startup line");
+        output += decoder.decode(value);
+      }
+      reader.releaseLock();
+
+      const second = Bun.spawn(["bun", "run", serverScript], { env, stdout: "pipe", stderr: "pipe" });
+      const exitCode = await second.exited;
+      const stderrText = await new Response(second.stderr).text();
+
+      expect(exitCode).toBe(1);
+      expect(stderrText).toContain("could not bind");
+      expect(stderrText).toContain("/sessions");
+    } finally {
+      first.kill();
+      await first.exited;
+    }
+  }, 15000);
 });

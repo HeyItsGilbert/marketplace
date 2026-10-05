@@ -34,6 +34,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   default. A new `GRILL_UI_ADVERTISE_HOST` env var (and matching
   `advertiseHost` config field) overrides the hostname printed in the
   startup log line / handed to the user, independent of the bind host.
+- A finished session is now pruned once it's been done for longer than
+  `GRILL_UI_SESSION_TTL_MS` (default 24 hours), so a shared server left
+  running for weeks doesn't accumulate every interview's full history
+  forever. A still-open session is never touched by this regardless of
+  age — only `POST /s/:id/done` starts a session's clock.
 
 ### Changed
 
@@ -47,6 +52,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   long, multi-sentence question. Resized to a readable body size
   (`1.15rem`, explicit `font-weight: 500`) so the options and controls are
   visible without scrolling even on a long question.
+- The CLI entrypoint no longer relocates to the next free port on a
+  bind conflict (`startServer()`'s general retry capability, still used
+  by its own tests, is simply not invoked from the entrypoint anymore).
+  It now fails fast with a message pointing at `GET /sessions` on the
+  conflicting port instead — relocating silently would make a startup
+  race's loser undiscoverable, since another launcher's discovery probe
+  only checks the expected port and would otherwise spin up a second,
+  orphaned server nobody else ever finds.
+
+### Fixed
+
+- A browser tab's WebSocket reconnect used to retry its session-scoped
+  socket forever with no way to tell a transient blip from the session
+  being permanently gone (most commonly a server restart, which drops
+  every in-memory session). It now checks `GET /sessions` on each
+  reconnect attempt and, if its session isn't listed anymore, returns
+  itself to the session picker instead of retrying an endpoint that can
+  never succeed again.
 
 ### Removed
 

@@ -346,6 +346,49 @@ describe("server restart detection", () => {
   });
 });
 
+describe("reconnect after WS close", () => {
+  // Regression: a WS close used to always retry the same session-scoped
+  // socket forever, with nothing to say so if the session is actually
+  // gone (most commonly a server restart, which drops all in-memory
+  // sessions) — the tab would spin retrying an endpoint that can never
+  // succeed again, with no visible sign anything was wrong.
+  test("if the server reports the session still exists, a close just reconnects", async () => {
+    const { window } = mountApp();
+    window.fetch = async (url) => {
+      assert.equal(url, "/sessions");
+      return { json: async () => ({ sessions: [{ id: "test-session", label: "x", done: false, pending: false, rounds: 0 }] }) };
+    };
+
+    await window.checkSessionThenReconnect();
+
+    assert.equal(FakeWebSocket.instances.length, 2, "reconnected with a fresh WebSocket instead of giving up");
+  });
+
+  test("if the server reports the session is gone, the tab navigates to the picker instead of retrying forever", async () => {
+    const { window, reloadAttempted } = mountApp();
+    window.fetch = async (url) => {
+      assert.equal(url, "/sessions");
+      return { json: async () => ({ sessions: [] }) };
+    };
+
+    await window.checkSessionThenReconnect();
+
+    assert.equal(reloadAttempted(), true, "navigated away instead of reconnecting to a session that no longer exists");
+    assert.equal(FakeWebSocket.instances.length, 1, "did not open a new socket for a session that's gone");
+  });
+
+  test("if the server is simply unreachable, it falls through to a plain reconnect rather than assuming the session is gone", async () => {
+    const { window } = mountApp();
+    window.fetch = async () => {
+      throw new Error("connection refused");
+    };
+
+    await window.checkSessionThenReconnect();
+
+    assert.equal(FakeWebSocket.instances.length, 2, "retried instead of navigating away on a transient outage");
+  });
+});
+
 describe("session label", () => {
   test("the boot message's label is shown in the top bar so concurrent tabs on different sessions are distinguishable", () => {
     const { window, ws } = mountApp();

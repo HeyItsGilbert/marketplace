@@ -564,6 +564,31 @@ async function loadPicker() {
 
 let ws;
 let knownBootId = null;
+
+// A WS close can mean a transient blip (server busy for a moment) or that
+// this session no longer exists at all — most commonly because the server
+// process restarted and lost its in-memory sessions, or this session's
+// record expired after finishing. Those need different responses: a blip
+// should just reconnect, but a gone session should send the tab back to
+// the picker instead of retrying an endpoint that will never succeed
+// again. The WebSocket close event itself doesn't expose which case this
+// is, so ask the server directly over plain HTTP.
+async function checkSessionThenReconnect() {
+  try {
+    const res = await fetch("/sessions");
+    const data = await res.json();
+    const stillExists = Array.isArray(data.sessions) && data.sessions.some((s) => s.id === sessionId);
+    if (!stillExists) {
+      location.href = "/";
+      return;
+    }
+  } catch {
+    // Server unreachable entirely (still down, or restarting) — fall
+    // through to a plain reconnect attempt, which will itself retry.
+  }
+  connect();
+}
+
 function connect() {
   const proto = location.protocol === "https:" ? "wss" : "ws";
   ws = new WebSocket(`${proto}://${location.host}/s/${sessionId}/ws`);
@@ -593,7 +618,7 @@ function connect() {
   });
 
   ws.addEventListener("close", () => {
-    setTimeout(connect, 1000);
+    setTimeout(checkSessionThenReconnect, 1000);
   });
 }
 

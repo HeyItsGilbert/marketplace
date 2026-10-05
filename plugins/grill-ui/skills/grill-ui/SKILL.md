@@ -18,7 +18,7 @@ The server is a dumb relay — it never calls a model and never spawns a subagen
      ```
      bun run <skill-directory>/server/server.ts
      ```
-     Start it however your harness runs a persistent background command (a named service, `run_in_background`, `nohup … &` with its PID captured, etc.). Wait for its startup log line, `Listening on http://<host>:<port>`, before continuing; that confirms it's ready and tells you the actual bound port (and advertised host — see **Persistent preferences** below) to use for the rest of this flow.
+     Start it however your harness runs a persistent background command (a named service, `run_in_background`, `nohup … &` with its PID captured, etc.). Wait for its startup log line, `Listening on http://<host>:<port>`, before continuing; that confirms it's ready and tells you the actual bound port (and advertised host — see **Persistent preferences** below) to use for the rest of this flow. If it instead exits with "could not bind" (another process — likely another grill-ui launch that raced yours — already took that port), that's deliberate: it never silently falls back to a nearby port, since a fallback nobody discovers defeats the whole shared-server point. Go back to the top of step 1 and re-probe; the winner of the race is now there to find.
 2. **Create (or re-attach to) your session**:
    ```sh
    curl -s -X POST http://127.0.0.1:<port>/sessions -H 'content-type: application/json' \
@@ -103,3 +103,5 @@ curl -s -X POST http://127.0.0.1:<port>/s/<id>/done
 ```
 
 This makes your session's browser tab show a completion screen; posting a round to this session after this is rejected. It does **not** affect any other session on the server — leave the server process running for them. Only stop it yourself if you're confident you're the one who started it (your discovery probe in step 1 found nothing running) **and** `GET /sessions` now shows no other session still pending (`"pending": true` or `"done": false`); otherwise leave it running for whoever started it or is still mid-interview. Do not act on the gathered answers until the user confirms you have reached a shared understanding.
+
+A finished session isn't kept forever: the server prunes a `done` session once it's been finished longer than `GRILL_UI_SESSION_TTL_MS` (default 24 hours), so a long-lived shared server's session table doesn't grow without bound across weeks of use. This never touches a still-open session, only ones already marked done. If a browser tab's session disappears out from under it (pruned, or the server restarted and lost its in-memory sessions entirely), the tab detects that on its next reconnect and returns itself to the session picker — nothing you need to handle, but worth knowing if the user reports a tab suddenly showing the picker instead of their interview.
