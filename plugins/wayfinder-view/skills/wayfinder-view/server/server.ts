@@ -13,7 +13,7 @@
 // idempotent: the existing session is returned, not duplicated.
 
 import { readFileSync, readdirSync } from "node:fs";
-import { networkInterfaces } from "node:os";
+import { homedir, networkInterfaces } from "node:os";
 import { join, resolve as resolvePath } from "node:path";
 import * as githubAdapter from "./adapters/github.ts";
 import * as localMarkdownAdapter from "./adapters/local-markdown.ts";
@@ -187,10 +187,74 @@ function lanAddresses(): string[] {
   return addresses;
 }
 
+// Optional on-disk preferences so a user who always wants the same
+// non-default port, or wants the startup link to advertise a hostname
+// other than loopback (a Tailscale/VPN name, a reverse-proxy domain —
+// anything that actually resolves back to this machine for them), doesn't
+// have to set `WAYFINDER_VIEW_*` env vars on every single `bun run
+// server.ts`. Env vars still win when set, so a one-off override never
+// has to touch the file. Mirrors grill-ui's identical config-file feature.
+type FileConfig = { host?: string; port?: number; advertiseHost?: string };
+
+// Narrows an unknown decoded JSON value to the subset of fields this
+// server understands, dropping anything the wrong type or empty — a
+// malformed or partially-garbage config file degrades to "unset" for the
+// affected field(s) instead of crashing startup or poisoning a value with
+// e.g. `NaN`. The cast to `Record<string, unknown>` is safe precisely
+// because every subsequent read goes through its own `typeof` check below
+// before being trusted — nothing is read off `obj` without being verified
+// first.
+export function parseFileConfig(raw: string): FileConfig {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    return {};
+  }
+  if (typeof parsed !== "object" || parsed === null) return {};
+  const obj = parsed as Record<string, unknown>;
+  const config: FileConfig = {};
+  if (typeof obj.host === "string" && obj.host.trim()) config.host = obj.host.trim();
+  if (typeof obj.port === "number" && Number.isInteger(obj.port) && obj.port > 0) config.port = obj.port;
+  if (typeof obj.advertiseHost === "string" && obj.advertiseHost.trim()) config.advertiseHost = obj.advertiseHost.trim();
+  return config;
+}
+
+function loadFileConfig(path: string): FileConfig {
+  try {
+    return parseFileConfig(readFileSync(path, "utf8"));
+  } catch {
+    // No config file, or it's unreadable — an optional preferences file
+    // missing or unusable should never fail the whole server start.
+    return {};
+  }
+}
+
+function defaultConfigPath(): string {
+  const xdgConfigHome = process.env.XDG_CONFIG_HOME || join(homedir(), ".config");
+  return join(xdgConfigHome, "wayfinder-view", "config.json");
+}
+
+// Precedence: env var > config file > built-in default, applied field by
+// field — e.g. a config file with only `advertiseHost` set still falls
+// through to the default port and `WAYFINDER_VIEW_PORT`, it doesn't force
+// the caller to repeat every field just to set one.
+export function resolveServerConfig(
+  fileConfig: FileConfig,
+  env: Record<string, string | undefined>,
+): { host: string; port: number; advertiseHost: string } {
+  const envPort = Number(env.WAYFINDER_VIEW_PORT);
+  return {
+    host: env.WAYFINDER_VIEW_HOST || fileConfig.host || "127.0.0.1",
+    port: (Number.isInteger(envPort) && envPort > 0 ? envPort : undefined) ?? fileConfig.port ?? 4830,
+    advertiseHost: env.WAYFINDER_VIEW_ADVERTISE_HOST || fileConfig.advertiseHost || "127.0.0.1",
+  };
+}
+
 if (import.meta.main) {
-  const host = process.env.WAYFINDER_VIEW_HOST || "127.0.0.1";
-  const envPort = Number(process.env.WAYFINDER_VIEW_PORT);
-  const port = Number.isInteger(envPort) && envPort > 0 ? envPort : 4830;
+  const configPath = process.env.WAYFINDER_VIEW_CONFIG_PATH || defaultConfigPath();
+  const fileConfig = loadFileConfig(configPath);
+  const { host: requestedHost, port: requestedPort, advertiseHost } = resolveServerConfig(fileConfig, process.env);
 
   let server: Bun.Server<unknown>;
   try {
@@ -200,20 +264,27 @@ if (import.meta.main) {
     // known port. Silently relocating to a fallback port on conflict would
     // make a startup race's loser undiscoverable — another launcher's
     // discovery probe only checks the expected port.
-    server = startServer(host, port, 1);
+    server = startServer(requestedHost, requestedPort, 1);
   } catch (err) {
-    console.error(`wayfinder-view: could not bind ${host}:${port} (${err instanceof Error ? err.message : err})`);
     console.error(
-      `Check whether a wayfinder-view server is already running there — GET http://${host}:${port}/sessions — and reuse it, or set WAYFINDER_VIEW_PORT to use a different one.`,
+      `wayfinder-view: could not bind ${requestedHost}:${requestedPort} (${err instanceof Error ? err.message : err})`,
+    );
+    console.error(
+      `Check whether a wayfinder-view server is already running there — GET http://${requestedHost}:${requestedPort}/sessions — and reuse it, or set WAYFINDER_VIEW_PORT (or the config file's "port") to use a different one.`,
     );
     process.exit(1);
   }
 
   // The `bash` tool's service readiness check matches this line via a log
-  // regex ("Listening on"), independent of the host text.
-  console.log(`Listening on http://${host}:${server.port}`);
+  // regex ("Listening on"), independent of the host text — `advertiseHost`
+  // defaults to loopback (always reachable from this machine regardless of
+  // what `WAYFINDER_VIEW_HOST` bound to) but can be overridden via
+  // `WAYFINDER_VIEW_ADVERTISE_HOST` or the config file's `advertiseHost`,
+  // e.g. to a Tailscale/VPN hostname or reverse-proxy domain the user
+  // actually reaches this machine through.
+  console.log(`Listening on http://${advertiseHost}:${server.port}`);
 
-  if (host === "0.0.0.0" || host === "::") {
+  if (requestedHost === "0.0.0.0" || requestedHost === "::") {
     const lan = lanAddresses();
     if (lan.length === 0) {
       console.log("WAYFINDER_VIEW_HOST requested network exposure, but no non-internal IPv4 address was found.");

@@ -28,6 +28,38 @@ Like `grill-ui`, the server is a single long-lived process meant to be **shared 
 
 Combine the server's host:port with the response's `url` and give the result to the user **once**, as a plain link — do not open it yourself. The user opens it in their own browser; its header shows the repo path and tracker, a jump bar lists every `wayfinder:map` in that repo (open and closed, each with its destination and closed/total ticket count), and the first map loads by default. Data refreshes only when the user reloads the page or clicks the viewer's own "Refresh" button — reusing the session later in the same conversation (another map resolved, another `/wayfinder` run) needs no new link; the same `/s/<id>` URL already reflects whatever the tracker holds as of the next refresh.
 
+By default the server only binds to loopback (`127.0.0.1`) — reachable from this machine alone. If the user wants to view from another device on the same network (e.g. a phone or a second computer), start it with `WAYFINDER_VIEW_HOST=0.0.0.0 bun run <skill-directory>/server/server.ts` instead; it then also logs a `http://<lan-ip>:<port>` line for each reachable network interface — hand the user whichever link matches how they want to connect. Only do this on a network the user trusts: the server has no authentication beyond rejecting cross-origin requests, so anyone on that network could read any open session's tracker data while it's exposed.
+
+## Persistent preferences (optional)
+
+A user who always wants the same non-default port, or wants the startup
+link to advertise a hostname other than loopback (a Tailscale/VPN name, a
+reverse-proxy domain — anything that actually resolves back to this
+machine for them), can set it once instead of exporting `WAYFINDER_VIEW_*`
+env vars on every launch. The server reads an optional JSON config file at
+startup — `$XDG_CONFIG_HOME/wayfinder-view/config.json` (or
+`~/.config/wayfinder-view/config.json` if `XDG_CONFIG_HOME` is unset), or
+wherever `WAYFINDER_VIEW_CONFIG_PATH` points:
+
+```json
+{
+  "host": "127.0.0.1",
+  "port": 5174,
+  "advertiseHost": "my-box.ts.net"
+}
+```
+
+All three fields are optional and independent — set only the ones that
+differ from the default. Precedence per field is **env var > config file >
+built-in default**, so a one-off override (`WAYFINDER_VIEW_PORT=4830 bun
+run server.ts`) never has to touch the file. This is a human-facing
+setting, not something you manage: don't create or edit this file yourself
+unless the user explicitly asks you to. What it does mean for you is that
+the port in the startup log line can differ from the `4830` default even
+though no `WAYFINDER_VIEW_PORT` was set for this launch — always read the
+actual bound port from that line (`Listening on http://<host>:<port>`),
+never assume it.
+
 ## Hand off the link at the end of a `/wayfinder` session
 
 If you're finishing a `/wayfinder` chart or work-through session, offer this viewer's link for the map you just touched as your closing step, using the probe-reuse-or-launch flow above: create (or reuse) a session for the current repo, then hand the user `http://<host>:<port>/s/<id>?map=<the map's id>` so the link opens directly on the map just worked, not just the repo's session root. This is an offer, not a requirement — the user may decline or already have a tab open.

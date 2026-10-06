@@ -28,6 +28,30 @@ or, under Claude Code:
 
 `WAYFINDER_VIEW_HOST`/`WAYFINDER_VIEW_PORT` env vars override the bind host/port for a single launch (defaults: `127.0.0.1` / `4830`), following the same convention as `grill-ui`'s `GRILL_UI_HOST`/`GRILL_UI_PORT`.
 
+Always want a non-default port, or want the link advertised in the
+startup log to use a hostname other than loopback (a Tailscale/VPN name,
+a reverse-proxy domain)? Drop a config file at
+`$XDG_CONFIG_HOME/wayfinder-view/config.json` (or `~/.config/wayfinder-view/config.json`):
+
+```json
+{
+  "host": "127.0.0.1",
+  "port": 5174,
+  "advertiseHost": "my-box.ts.net"
+}
+```
+
+All fields are optional. `WAYFINDER_VIEW_HOST`/`WAYFINDER_VIEW_PORT`/`WAYFINDER_VIEW_ADVERTISE_HOST`
+env vars (and `WAYFINDER_VIEW_CONFIG_PATH` to point at a different config file)
+override the matching field for a single launch without touching the file.
+This mirrors `grill-ui`'s identical config-file feature exactly.
+
+By default the server binds to loopback only. Set `host` to `0.0.0.0` (via
+the config file or `WAYFINDER_VIEW_HOST=0.0.0.0`) to also serve the local
+network — the startup log then prints a `http://<lan-ip>:<port>` line per
+reachable interface. Only do this on a trusted network: the server has no
+authentication beyond rejecting cross-origin requests.
+
 ## Usage
 
 `/wayfinder-view` is **user-invoked** (`disable-model-invocation: true`) — see `skills/wayfinder-view/SKILL.md` for the full agent-facing protocol (`POST /sessions`, the `/s/:id/api/...` data endpoints, adapter resolution). The intended flow is that a `/wayfinder` chart or work-through session offers this viewer's link as its closing step, so the user lands on the map just touched without a separate launch step; `wayfinder-view` can also be opened standalone against any repo with wayfinder maps.

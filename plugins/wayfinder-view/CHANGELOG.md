@@ -55,3 +55,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Strictly read-only end to end: no claiming, closing, commenting, or
   editing a ticket from the viewer. Data refreshes only on page load or an
   explicit "Refresh" click — never polling, never a live push.
+- An optional config file (`$XDG_CONFIG_HOME/wayfinder-view/config.json`,
+  or `WAYFINDER_VIEW_CONFIG_PATH`) for a user who always wants a
+  non-default port or a non-loopback advertised hostname (a Tailscale/VPN
+  name, a reverse-proxy domain) without exporting `WAYFINDER_VIEW_*` env
+  vars on every launch — mirrors `grill-ui`'s identical feature. Fields
+  (`host`, `port`, `advertiseHost`) are each independently optional;
+  precedence per field is env var > config file > built-in default. A new
+  `WAYFINDER_VIEW_ADVERTISE_HOST` env var (and matching `advertiseHost`
+  config field) overrides the hostname printed in the startup log line /
+  handed to the user, independent of the bind host — e.g. binding
+  `WAYFINDER_VIEW_HOST=0.0.0.0` to also serve the local network while
+  still advertising a stable `advertiseHost` link.

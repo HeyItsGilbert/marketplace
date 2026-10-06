@@ -11,7 +11,7 @@ import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, test } from "bun:test";
-import { detectTrackerKind, startServer } from "./server.ts";
+import { detectTrackerKind, parseFileConfig, resolveServerConfig, startServer } from "./server.ts";
 
 const tempDirs: string[] = [];
 function makeRepo(): string {
@@ -252,5 +252,70 @@ describe("static assets", () => {
     } finally {
       server.stop(true);
     }
+  });
+});
+
+describe("config file parsing", () => {
+  test("a well-formed config is read field by field", () => {
+    expect(parseFileConfig('{"host":"0.0.0.0","port":5174,"advertiseHost":"my-box.ts.net"}')).toEqual({
+      host: "0.0.0.0",
+      port: 5174,
+      advertiseHost: "my-box.ts.net",
+    });
+  });
+
+  test("invalid JSON, a non-object, or an empty file degrades to no preferences instead of crashing startup", () => {
+    for (const raw of ["not json", "null", "42", '"just a string"', ""]) {
+      expect(parseFileConfig(raw)).toEqual({});
+    }
+  });
+
+  test("a field of the wrong type, an empty string, or a non-positive port is dropped instead of poisoning the resolved config", () => {
+    expect(parseFileConfig('{"port":"5174"}')).toEqual({});
+    expect(parseFileConfig('{"port":0}')).toEqual({});
+    expect(parseFileConfig('{"port":-1}')).toEqual({});
+    expect(parseFileConfig('{"port":3.5}')).toEqual({});
+    expect(parseFileConfig('{"host":""}')).toEqual({});
+    expect(parseFileConfig('{"host":"   "}')).toEqual({});
+  });
+
+  test("only some fields set still leaves the others absent, not defaulted to garbage", () => {
+    expect(parseFileConfig('{"advertiseHost":"my-box.ts.net"}')).toEqual({ advertiseHost: "my-box.ts.net" });
+  });
+});
+
+describe("config precedence: env var > config file > built-in default", () => {
+  test("with neither an env var nor a config file, every field falls back to its built-in default", () => {
+    expect(resolveServerConfig({}, {})).toEqual({ host: "127.0.0.1", port: 4830, advertiseHost: "127.0.0.1" });
+  });
+
+  test("a config file's values are used when no env var overrides them", () => {
+    expect(resolveServerConfig({ host: "0.0.0.0", port: 5174, advertiseHost: "my-box.ts.net" }, {})).toEqual({
+      host: "0.0.0.0",
+      port: 5174,
+      advertiseHost: "my-box.ts.net",
+    });
+  });
+
+  test("an env var wins over the same field in the config file", () => {
+    const fileConfig = { host: "0.0.0.0", port: 5174, advertiseHost: "my-box.ts.net" };
+    const env = { WAYFINDER_VIEW_HOST: "127.0.0.1", WAYFINDER_VIEW_PORT: "9000", WAYFINDER_VIEW_ADVERTISE_HOST: "localhost" };
+    expect(resolveServerConfig(fileConfig, env)).toEqual({ host: "127.0.0.1", port: 9000, advertiseHost: "localhost" });
+  });
+
+  test("fields are resolved independently — a config file setting only advertiseHost still gets the default port/host, not a forced override of everything", () => {
+    expect(resolveServerConfig({ advertiseHost: "my-box.ts.net" }, {})).toEqual({
+      host: "127.0.0.1",
+      port: 4830,
+      advertiseHost: "my-box.ts.net",
+    });
+  });
+
+  test("a non-numeric or junk WAYFINDER_VIEW_PORT env var is ignored in favor of the config file/default instead of resolving to NaN", () => {
+    expect(resolveServerConfig({ port: 5174 }, { WAYFINDER_VIEW_PORT: "not-a-number" })).toEqual({
+      host: "127.0.0.1",
+      port: 5174,
+      advertiseHost: "127.0.0.1",
+    });
   });
 });
