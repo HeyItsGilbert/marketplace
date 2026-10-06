@@ -21,7 +21,10 @@
       <span id="repoPath"></span>
       <span id="trackerBadge"></span>
     </div>
-    <button id="refreshBtn" title="Reload this map's data from the tracker">⟳ Refresh</button>
+    <div id="topbarActions">
+      <button id="themeBtn" title="Switch renderer theme"></button>
+      <button id="refreshBtn" title="Reload this map's data from the tracker">⟳ Refresh</button>
+    </div>
   </header>
 
   <nav id="jumpBar" hidden></nav>
@@ -45,6 +48,8 @@
 
   <div id="empty" hidden>No wayfinder maps found for this repo yet.</div>
 
+  <script src="/themes/starmap.js"></script>
+  <script src="/themes/dungeon.js"></script>
   <script src="/app.js"></script>
 </body>
 </html>

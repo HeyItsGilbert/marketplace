@@ -7,6 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Dungeon theme**: a second renderer alongside the star map (#64,
+  following up on the #60 prototype), implementing Watabou's own
+  documented symmetric tree-growth algorithm — the map is the entrance
+  (a stairs-down glyph), primary-tier tickets grow outward as rooms
+  (two side children plus one straight-ahead child per generation),
+  dependent-tier tickets grow the same way as side-chambers off their
+  host room, and `crossLinkIds` render as dashed secret doors. Ink/
+  parchment styling (graph-paper grid, walled corridors, jittered wall
+  hatching, door jambs) reuses #56's structural visual channels
+  (ring = status, icon = type) in its own palette. Static by design —
+  no pan/zoom/minimap — a point-in-time "explored map" feel, a
+  deliberate contrast to the star map's orbital motion.
+- A topbar **theme toggle** switches between the star map and dungeon
+  renderers as an instant client-side re-render of the already-fetched
+  view-model — never a refetch or page reload. The choice persists
+  per-browser (`localStorage`), overridable per-link via a `?theme=`
+  URL param.
+- `server/public/` split into a shared, theme-agnostic controller
+  (`app.js`: session/picker/topbar/HUD/URL-param plumbing, pan/zoom
+  input handling) plus swappable renderer modules under
+  `server/public/themes/` (`starmap.js`, `dungeon.js`) implementing a
+  common interface (`buildLayout`/`draw`/`drawMinimap` plus
+  `usesPanZoom`/`usesMinimap` capability flags) — no server or
+  `view-model.ts` changes; both themes consume the identical
+  `MapViewModel` JSON.
+
+
 ## [1.0.0] - 2026-10-05
 
 ### Added

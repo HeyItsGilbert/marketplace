@@ -64,8 +64,13 @@ html, body {
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
+#topbarActions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
 
-#refreshBtn {
+#refreshBtn, #themeBtn {
   font-family: inherit;
   font-size: 12px;
   background: rgba(255, 255, 255, 0.06);
@@ -75,7 +80,7 @@ html, body {
   padding: 6px 10px;
   cursor: pointer;
 }
-#refreshBtn:hover { background: rgba(255, 255, 255, 0.12); }
+#refreshBtn:hover, #themeBtn:hover { background: rgba(255, 255, 255, 0.12); }
 
 #jumpBar {
   position: fixed;
@@ -206,3 +211,51 @@ html, body {
   font-size: 13px;
 }
 #pickerList a:hover { background: rgba(255, 255, 255, 0.12); }
+
+/* ---------------------------------------------------------------------
+   Dungeon theme chrome — ink-on-parchment, matching the renderer's own
+   palette (prototype/wayfinder-dungeon-map), applied only to the shared
+   chrome; the canvas itself paints its own background every frame. */
+
+body.theme-dungeon { background: #e9dec0; color: #3a2d18; }
+
+body.theme-dungeon #topbar {
+  background: linear-gradient(to bottom, rgba(233, 222, 192, 0.92), transparent);
+}
+body.theme-dungeon #repoInfo { color: #6b5636; }
+body.theme-dungeon #trackerBadge { background: rgba(58, 45, 24, 0.08); color: #3a2d18; }
+body.theme-dungeon #refreshBtn, body.theme-dungeon #themeBtn {
+  background: rgba(58, 45, 24, 0.06);
+  border-color: rgba(58, 45, 24, 0.25);
+  color: #3a2d18;
+}
+body.theme-dungeon #refreshBtn:hover, body.theme-dungeon #themeBtn:hover { background: rgba(58, 45, 24, 0.12); }
+
+body.theme-dungeon #jumpBar {
+  background: rgba(243, 234, 210, 0.92);
+  border-color: rgba(58, 45, 24, 0.3);
+}
+body.theme-dungeon #jumpBar button { color: #6b5636; }
+body.theme-dungeon #jumpBar button strong { color: #3a2d18; }
+body.theme-dungeon #jumpBar button .progress { color: #8a6a1e; }
+body.theme-dungeon #jumpBar button .dest { color: #9c8a66; }
+body.theme-dungeon #jumpBar button:hover { background: rgba(58, 45, 24, 0.06); }
+body.theme-dungeon #jumpBar button.active { border-color: #7a2d2d; background: rgba(122, 45, 45, 0.08); }
+
+body.theme-dungeon #hud {
+  background: rgba(243, 234, 210, 0.95);
+  border-color: rgba(58, 45, 24, 0.3);
+  color: #3a2d18;
+}
+body.theme-dungeon #hudClose { color: #6b5636; }
+body.theme-dungeon #hudMeta { color: #6b5636; }
+body.theme-dungeon #hudGist { color: #4a3b22; }
+body.theme-dungeon #hudLink { color: #2d5a8a; }
+
+body.theme-dungeon #legend { background: rgba(243, 234, 210, 0.85); color: #6b5636; }
+body.theme-dungeon #legend .ring.frontier { border-color: #b33a2e; }
+body.theme-dungeon #legend .ring.blocked { border-color: #6b4f9e; }
+body.theme-dungeon #legend .ring.claimed { border-color: #8a6a1e; }
+body.theme-dungeon #legend .ring.closed { border-color: #3a2d18; }
+
+body.theme-dungeon #empty { color: #6b5636; }

@@ -120,6 +120,9 @@ export function startServer(host: string, startPort: number, attemptsLeft = 20):
     if (url.pathname === "/style.css") {
       return new Response(Bun.file(publicFile("style.css")), { headers: { "Content-Type": "text/css; charset=utf-8" } });
     }
+    if (url.pathname === "/themes/starmap.js" || url.pathname === "/themes/dungeon.js") {
+      return new Response(Bun.file(publicFile(url.pathname.slice(1))), { headers: { "Content-Type": "application/javascript; charset=utf-8" } });
+    }
 
     return new Response("Not found", { status: 404 });
   }
