@@ -1,0 +1,208 @@
+* { box-sizing: border-box; }
+
+/* `#topbar`/`#jumpBar`/`#legend`/`#picker` each set their own `display`
+   (flex) for layout — without this, the `display: flex` from those
+   ID-selector rules beats the UA stylesheet's `[hidden] { display: none }`
+   (same specificity tier, later/more specific author rule wins), so
+   toggling `.hidden = true` from app.js would stop hiding them. */
+[hidden] { display: none !important; }
+
+html, body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  background: #05060a;
+  overflow: hidden;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  color: #e7e9f0;
+}
+
+#sky {
+  display: block;
+  width: 100vw;
+  height: 100vh;
+  touch-action: none;
+}
+
+#minimap {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 5;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+#topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 6;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px;
+  background: linear-gradient(to bottom, rgba(5, 6, 10, 0.9), transparent);
+  pointer-events: none;
+}
+#topbar > * { pointer-events: auto; }
+
+#repoInfo {
+  font-size: 12px;
+  color: #a6adc8;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+#trackerBadge {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  padding: 2px 8px;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+#refreshBtn {
+  font-family: inherit;
+  font-size: 12px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #e7e9f0;
+  border-radius: 6px;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+#refreshBtn:hover { background: rgba(255, 255, 255, 0.12); }
+
+#jumpBar {
+  position: fixed;
+  bottom: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 5;
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+  max-width: 80vw;
+  overflow-x: auto;
+  background: rgba(20, 22, 32, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  padding: 6px;
+  backdrop-filter: blur(6px);
+}
+
+#jumpBar button {
+  font-family: inherit;
+  text-align: left;
+  font-size: 11px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #a6adc8;
+  padding: 6px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 120px;
+}
+#jumpBar button strong { color: #e7e9f0; font-size: 12px; }
+#jumpBar button .progress { color: #7cc4ff; }
+#jumpBar button .dest { color: #6b7086; max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#jumpBar button:hover { background: rgba(255, 255, 255, 0.06); }
+#jumpBar button.active { border-color: #ffd166; background: rgba(255, 209, 102, 0.08); }
+
+#hud {
+  position: fixed;
+  left: 16px;
+  bottom: 16px;
+  z-index: 7;
+  max-width: 320px;
+  background: rgba(14, 15, 22, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+#hudClose {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  background: none;
+  border: none;
+  color: #7b8097;
+  font-size: 16px;
+  cursor: pointer;
+}
+#hudTitle { font-size: 14px; font-weight: 700; padding-right: 20px; }
+#hudMeta { margin-top: 6px; font-size: 11px; color: #a6adc8; text-transform: lowercase; }
+#hudGist { margin-top: 8px; font-size: 12px; color: #cfd4ff; line-height: 1.4; }
+#hudLink { display: inline-block; margin-top: 10px; font-size: 12px; color: #ffd166; text-decoration: none; }
+#hudLink:hover { text-decoration: underline; }
+
+#legend {
+  position: fixed;
+  top: 54px;
+  right: 16px;
+  z-index: 5;
+  font-size: 10px;
+  color: #7b8097;
+  background: rgba(14, 15, 22, 0.7);
+  border-radius: 8px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+#legend .ring {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  margin-right: 4px;
+  vertical-align: middle;
+  border: 2px solid;
+}
+#legend .ring.frontier { border-color: #ffb648; }
+#legend .ring.blocked { border-color: #c97f82; border-style: dashed; }
+#legend .ring.claimed { border-color: #6fb3ff; }
+#legend .ring.closed { border-color: #52d38a; }
+#legend .sep { height: 1px; background: rgba(255, 255, 255, 0.1); margin: 2px 0; }
+
+#empty {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 5;
+  color: #7b8097;
+  font-size: 13px;
+}
+
+#picker {
+  position: fixed;
+  inset: 0;
+  z-index: 8;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #05060a;
+}
+#picker h1 { font-size: 20px; }
+.muted { color: #7b8097; font-size: 12px; }
+#pickerList { list-style: none; padding: 0; margin-top: 16px; width: 480px; max-width: 90vw; }
+#pickerList li { margin-bottom: 8px; }
+#pickerList a {
+  display: block;
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+  color: #e7e9f0;
+  text-decoration: none;
+  font-size: 13px;
+}
+#pickerList a:hover { background: rgba(255, 255, 255, 0.12); }

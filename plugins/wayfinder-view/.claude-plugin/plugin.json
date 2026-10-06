@@ -1,0 +1,5 @@
+{
+  "name": "wayfinder-view",
+  "description": "Adds a /wayfinder-view skill: renders a wayfinder map as a navigable star system through a local Bun-served browser page (requires Bun)",
+  "version": "1.0.0"
+}

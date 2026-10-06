@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>wayfinder-view</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <canvas id="sky"></canvas>
+  <canvas id="minimap"></canvas>
+
+  <div id="picker" hidden>
+    <h1>wayfinder-view</h1>
+    <p class="muted">Pick a session, or create one from your agent's <code>/wayfinder</code> run.</p>
+    <ul id="pickerList"></ul>
+  </div>
+
+  <header id="topbar" hidden>
+    <div id="repoInfo">
+      <span id="repoPath"></span>
+      <span id="trackerBadge"></span>
+    </div>
+    <button id="refreshBtn" title="Reload this map's data from the tracker">⟳ Refresh</button>
+  </header>
+
+  <nav id="jumpBar" hidden></nav>
+
+  <div id="hud" hidden>
+    <button id="hudClose" aria-label="Close">×</button>
+    <div id="hudTitle"></div>
+    <div id="hudMeta"></div>
+    <div id="hudGist"></div>
+    <a id="hudLink" target="_blank" rel="noopener">Open ticket →</a>
+  </div>
+
+  <div id="legend" hidden>
+    <div><span class="ring frontier"></span> frontier</div>
+    <div><span class="ring blocked"></span> blocked</div>
+    <div><span class="ring claimed"></span> claimed</div>
+    <div><span class="ring closed"></span> closed</div>
+    <div class="sep"></div>
+    <div>⚗ research · ✎ prototype · ◆ grilling · ✓ task</div>
+  </div>
+
+  <div id="empty" hidden>No wayfinder maps found for this repo yet.</div>
+
+  <script src="/app.js"></script>
+</body>
+</html>
