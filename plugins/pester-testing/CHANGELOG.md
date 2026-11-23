@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.1] - 2026-11-22
+
+### Fixed
+
+- `pester-write`'s pointer to the patterns reference (`../pester-patterns/references/patterns.md`) resolved incorrectly under omp's `skill://` scheme, producing "File not found" (seen 16x across omp sessions). Added the absolute `skill://pester-patterns/references/patterns.md` form for omp, with the relative path kept as a fallback for Claude Code's Read tool.
+
 ## [2.0.0] - 2026-08-31
 
 ### Changed
